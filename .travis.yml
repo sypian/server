@@ -10,13 +10,13 @@ jobs:
     - stage: build docker image
       script:
         - docker run --rm --volume $(TRAVIS_BUILD_DIR):/app composer install
-	      - docker-compose build
+        - docker-compose build
     - stage: test
       script:
         - docker run --rm --volume $(TRAVIS_BUILD_DIR):/app composer install
-	      - docker-compose build
+        - docker-compose build
         - make lint
     - script:
         - docker run --rm --volume $(TRAVIS_BUILD_DIR):/app composer install
-	      - docker-compose build
+        - docker-compose build
         - make test
