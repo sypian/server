@@ -8,8 +8,11 @@ service:
 jobs:
   include:
     - stage: build docker image
-      script:
-        - docker-compose build
+      script: make build
     - stage: test
-      script: make lint
-    - script: make test
+      script:
+        - make build
+        - make lint
+    - script:
+        - make build
+        - make test
