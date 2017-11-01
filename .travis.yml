@@ -8,11 +8,15 @@ service:
 jobs:
   include:
     - stage: build docker image
-      script: make build
+      script:
+        - docker run --rm --volume $(TRAVIS_BUILD_DIR):/app composer install
+	      - docker-compose build
     - stage: test
       script:
-        - make build
+        - docker run --rm --volume $(TRAVIS_BUILD_DIR):/app composer install
+	      - docker-compose build
         - make lint
     - script:
-        - make build
+        - docker run --rm --volume $(TRAVIS_BUILD_DIR):/app composer install
+	      - docker-compose build
         - make test

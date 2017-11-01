@@ -1,5 +1,5 @@
 build:
-	docker run --rm --volume $(pwd):/app composer install
+	docker run --rm --user $(shell id -u):$(shell id -g) --volume /etc/passwd:/etc/passwd:ro --volume /etc/group:/etc/group:ro --volume $(shell pwd):/app composer install
 	docker-compose build
 
 lint:
@@ -7,4 +7,3 @@ lint:
 
 test:
 	docker-compose run php-fpm phpunit
-
