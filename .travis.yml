@@ -16,17 +16,15 @@ jobs:
         - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
         - docker-compose build
     - stage: test
-      before_script:
-        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        - chmod +x ./cc-test-reporter
-        - ./cc-test-reporter before-build
-      after_script:
-        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
       script:
         - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
         - docker-compose build
         - make lint
     - script:
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
         - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
         - docker-compose build
         - make test
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
