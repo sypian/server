@@ -6,4 +6,4 @@ lint:
 	docker-compose run php-fpm phpcs
 
 test:
-	docker-compose run php-fpm phpunit
+	docker-compose run php-fpm phpunit --coverage-html coverage --coverage-clover clover.xml --coverage-text
