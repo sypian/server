@@ -1,0 +1,11 @@
+version: "3.1"
+services:
+
+    php-fpm:
+      build:
+        context: .
+      container_name: sypian-server
+      ports:
+        - 8000:8000
+      volumes:
+        - .:/usr/src/app

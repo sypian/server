@@ -1,0 +1,30 @@
+language: php
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=787a2f89b15c637323c7340d65ec17e898ac44480706b4b4122ea040c2a88f1d
+
+sudo: required
+
+service:
+  - docker
+
+jobs:
+  include:
+    - stage: build docker image
+      script:
+        - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
+        - docker-compose build
+    - stage: test
+      script:
+        - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
+        - docker-compose build
+        - make lint
+    - script:
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+        - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
+        - docker-compose build
+        - make test
+        - docker-compose run php-fpm ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT -r $CC_TEST_REPORTER_ID
