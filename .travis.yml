@@ -27,4 +27,4 @@ jobs:
         - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
         - docker-compose build
         - make test
-        - docker-compose run php-fpm ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+        - docker-compose run php-fpm ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT -r $CC_TEST_REPORTER_ID
