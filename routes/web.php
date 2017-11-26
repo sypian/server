@@ -14,3 +14,7 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->post('/category', [
+    'as' => 'category', 'uses' => 'CategoryController@createCategory'
+]);
