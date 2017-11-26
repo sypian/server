@@ -10,6 +10,8 @@ RUN apt-get update \
 RUN pecl install xdebug-2.5.4 \
     && docker-php-ext-enable xdebug
 
+RUN docker-php-ext-install bcmath
+
 ENV PATH="/usr/src/app/vendor/bin:${PATH}"
 
 CMD [ "php", "-S", "localhost:8000", "-t", "./public" ]

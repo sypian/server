@@ -2,6 +2,8 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
+use GraphAware\Neo4j\OGM\EntityManager;
+
 try {
     (new Dotenv\Dotenv(__DIR__.'/../'))->load();
 } catch (Dotenv\Exception\InvalidPathException $e) {
@@ -47,6 +49,9 @@ $app->singleton(
     Illuminate\Contracts\Console\Kernel::class,
     App\Console\Kernel::class
 );
+
+$entityManager = EntityManager::create(env('NEO4J_HOST').':'.env('NEO4J_PORT'));
+$app->instance('Neo4j\EntityManager', $entityManager);
 
 /*
 |--------------------------------------------------------------------------
