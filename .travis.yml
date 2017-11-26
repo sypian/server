@@ -13,18 +13,18 @@ jobs:
   include:
     - stage: build docker image
       script:
-        - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
+        - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install --ignore-platform-reqs
         - docker-compose build
     - stage: test
       script:
-        - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
+        - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install --ignore-platform-reqs
         - docker-compose build
         - make lint
     - script:
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         - chmod +x ./cc-test-reporter
         - ./cc-test-reporter before-build
-        - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install
+        - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install --ignore-platform-reqs
         - docker-compose build
         - make test
         - docker-compose run php-fpm ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT -r $CC_TEST_REPORTER_ID
