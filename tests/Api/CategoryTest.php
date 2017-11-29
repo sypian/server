@@ -14,7 +14,7 @@ class CategoryTest extends TestCase
      */
     public function testValidCall()
     {
-        $this->post('/category', ['key' => 'testcat', 'properties' => []]);
+        $this->post('/category', ['name' => 'testcat']);
 
         $this->assertEquals(
             200,
@@ -47,12 +47,20 @@ class CategoryTest extends TestCase
     {
         return [
             [
-                ['keyyy' => 'testcat', 'properties' => []],
-                'No category key defined',
+                ['keyyy' => 'testcat', 'falseproperty' => 'test'],
+                'No category name defined.',
             ],
             [
-                ['key' => 'testcat', 'proooperties' => []],
-                'No category properties defined',
+                ['name' => 'testcat', 'falseproperty' => 'test'],
+                'Property "falseproperty" not supported.',
+            ],
+            [
+                ['name' => 'testcat', 'falseproperty1' => 'test', 'falseproperty2' => 'test'],
+                'Properties "falseproperty1", "falseproperty2" not supported.',
+            ],
+            [
+                [],
+                'Empty request.',
             ]
         ];
     }

@@ -12,19 +12,36 @@ class CategoryController extends Controller
      */
     public function createCategory(Request $request)
     {
-        if ($request->has('key') && $request->has('properties')) {
+        if ($request->has('name') && count($request->except('name')) === 0) {
             $category = new Category();
-            $category->setName($request->get('key'));
+            $category->setName($request->get('name'));
 
             $entityManager = app()->make('Neo4j\EntityManager');
             $entityManager->persist($category);
             $entityManager->flush();
 
             $response = response($category->getId(), 200);
-        } elseif (!$request->has('key')) {
-            $response = response('No category key defined', 405);
-        } elseif (!$request->has('properties')) {
-            $response = response('No category properties defined', 405);
+        } elseif (count($request->all()) === 0) {
+            $response = response('Empty request.', 405);
+        } elseif (!$request->has('name')) {
+            $response = response('No category name defined.', 405);
+        } elseif (count($request->except('name')) > 0) {
+            $invalidParams = array_keys($request->except('name'));
+
+            if (count($invalidParams) > 1) {
+                $paramStr = '';
+
+                foreach ($invalidParams as $paramKey) {
+                    $paramStr .= '"'.$paramKey.'", ';
+                }
+
+                $paramStr = trim($paramStr, ', ');
+                $message = sprintf('Properties %s not supported.', $paramStr);
+            } else {
+                $message = 'Property "'.reset($invalidParams).'" not supported.';
+            }
+
+            $response = response($message, 405);
         }
 
         return $response;
