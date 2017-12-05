@@ -8,11 +8,11 @@ use Tests\TestCase;
 class CategoryTest extends TestCase
 {
     /**
-     * Returns a 200 for a correct call.
+     * Returns a 200 for a correct post call.
      *
      * @return void
      */
-    public function testValidCall()
+    public function testValidPost()
     {
         $this->post('/category', ['name' => 'testcat']);
 
@@ -27,9 +27,9 @@ class CategoryTest extends TestCase
      *
      * @return void
      *
-     * @dataProvider getInvalidInputs
+     * @dataProvider getInvalidPostInputs
      */
-    public function testInvalidInput($input, $responseContent)
+    public function testInvalidPostInputs($input, $responseContent)
     {
         $this->post('/category', $input);
 
@@ -43,7 +43,10 @@ class CategoryTest extends TestCase
         );
     }
 
-    public function getInvalidInputs()
+    /**
+     * @return mixed[]
+     */
+    public function getInvalidPostInputs(): array
     {
         return [
             [
