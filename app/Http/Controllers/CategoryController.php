@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use App\Models\Category;
 
 class CategoryController extends Controller
 {
     /**
-     * @return Illuminate\Http\Response
+     * @return Response
      */
-    public function createCategory(Request $request)
+    public function createCategory(Request $request): Response
     {
         if ($request->has('name') && count($request->except('name')) === 0) {
             $category = new Category();
@@ -42,6 +44,25 @@ class CategoryController extends Controller
             }
 
             $response = response($message, 405);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @return Response
+     */
+    public function getCategory(Request $request): JsonResponse
+    {
+        $name = $request->get('name');
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $categoriesRepository = $entityManager->getRepository(Category::class);
+        $category = $categoriesRepository->findOneBy(['name' => $name]);
+
+        if ($category === null) {
+            $response = response()->json(['message' => 'Category "'.$name.'" not found.'], 404);
+        } else {
+            $response = response()->json(['name' => $category->getName(), 'id' => 1]);
         }
 
         return $response;

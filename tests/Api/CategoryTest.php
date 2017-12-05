@@ -1,12 +1,22 @@
 <?php
 namespace Tests\Api;
 
-use Laravel\Lumen\Testing\DatabaseMigrations;
-use Laravel\Lumen\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class CategoryTest extends TestCase
 {
+    /**
+     * Clear the database before each test.
+     *
+     * It does not reset node ids!
+     */
+    public function setUp()
+    {
+        parent::setUp();
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $query = $entityManager->createQuery('MATCH (n) DETACH DELETE n');
+        $result = $query->execute();
+    }
     /**
      * Returns a 200 for a correct post call.
      *
@@ -66,5 +76,31 @@ class CategoryTest extends TestCase
                 'Empty request.',
             ]
         ];
+    }
+
+    public function testValidGetRequest()
+    {
+        $this->post('/category', ['name' => 'testcat']);
+        $this->json('GET', '/category', ['name' => 'testcat'])
+             ->seeJson([
+                 'name' => 'testcat',
+             ]);
+        $this->assertArrayHasKey('id', $this->response->getData(true));
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+    }
+
+    public function testCategoryNotFound()
+    {
+        $this->json('GET', '/category', ['name' => 'nocategory'])
+                ->seeJson([
+                    'message' => 'Category "nocategory" not found.',
+                ]);
+        $this->assertEquals(
+            404,
+            $this->response->getStatusCode()
+        );
     }
 }
