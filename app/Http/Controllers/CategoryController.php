@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Models\Category;
 
@@ -12,7 +11,7 @@ class CategoryController extends Controller
     /**
      * @return Response
      */
-    public function createCategory(Request $request): Response
+    public function createCategory(Request $request): JsonResponse
     {
         if ($request->has('name') && count($request->except('name')) === 0) {
             $category = new Category();
@@ -22,11 +21,11 @@ class CategoryController extends Controller
             $entityManager->persist($category);
             $entityManager->flush();
 
-            $response = response($category->getId(), 200);
+            $response = response()->json(['message' => $category->getId()], 200);
         } elseif (count($request->all()) === 0) {
-            $response = response('Empty request.', 405);
+            $response = response()->json(['message' => 'Empty request.'], 405);
         } elseif (!$request->has('name')) {
-            $response = response('No category name defined.', 405);
+            $response = response()->json(['message' => 'No category name defined.'], 405);
         } elseif (count($request->except('name')) > 0) {
             $invalidParams = array_keys($request->except('name'));
 
@@ -43,7 +42,7 @@ class CategoryController extends Controller
                 $message = 'Property "'.reset($invalidParams).'" not supported.';
             }
 
-            $response = response($message, 405);
+            $response = response()->json(['message' => $message], 405);
         }
 
         return $response;

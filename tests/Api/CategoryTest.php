@@ -41,15 +41,14 @@ class CategoryTest extends TestCase
      */
     public function testInvalidPostInputs($input, $responseContent)
     {
-        $this->json('POST', '/category', $input);
+        $this->json('POST', '/category', $input)
+            ->seeJson([
+                'message' => $responseContent,
+            ]);
 
         $this->assertEquals(
             405,
             $this->response->getStatusCode()
-        );
-        $this->assertEquals(
-            $responseContent,
-            $this->response->getContent()
         );
     }
 
