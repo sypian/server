@@ -24,7 +24,7 @@ class CategoryTest extends TestCase
      */
     public function testValidPost()
     {
-        $this->post('/category', ['name' => 'testcat']);
+        $this->json('POST', '/category', ['name' => 'testcat']);
 
         $this->assertEquals(
             200,
@@ -41,7 +41,7 @@ class CategoryTest extends TestCase
      */
     public function testInvalidPostInputs($input, $responseContent)
     {
-        $this->post('/category', $input);
+        $this->json('POST', '/category', $input);
 
         $this->assertEquals(
             405,
@@ -80,7 +80,7 @@ class CategoryTest extends TestCase
 
     public function testValidGetRequest()
     {
-        $this->post('/category', ['name' => 'testcat']);
+        $this->json('POST', '/category', ['name' => 'testcat']);
         $this->json('GET', '/category', ['name' => 'testcat'])
              ->seeJson([
                  'name' => 'testcat',
