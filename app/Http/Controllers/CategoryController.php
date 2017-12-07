@@ -62,7 +62,34 @@ class CategoryController extends Controller
         if ($category === null) {
             $response = response()->json(['message' => 'Category "'.$name.'" not found.'], 404);
         } else {
-            $response = response()->json(['name' => $category->getName(), 'id' => 1]);
+            $response = response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @return Response
+     */
+    public function updateCategory(Request $request): JsonResponse
+    {
+        if (!$request->has('id')) {
+            $response = response()->json(['message' => 'Missing category node id.'], 405);
+        } else {
+            $id = $request->get('id');
+            $name = $request->get('name');
+            $entityManager = app()->make('Neo4j\EntityManager');
+            $categoriesRepository = $entityManager->getRepository(Category::class);
+            $category = $categoriesRepository->findOneById($id);
+
+            if ($category === null) {
+                $response = response()->json(['message' => 'Category node with id "'.$id.'" not found.'], 404);
+            } else {
+                $category->setName($name);
+                $entityManager->persist($category);
+                $entityManager->flush();
+                $response = response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
+            }
         }
 
         return $response;

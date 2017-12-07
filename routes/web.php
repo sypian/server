@@ -21,3 +21,6 @@ $router->post('/category', [
 $router->get('/category', [
     'as' => 'category', 'uses' => 'CategoryController@getCategory'
 ]);
+$router->put('/category', [
+    'as' => 'category', 'uses' => 'CategoryController@updateCategory'
+]);

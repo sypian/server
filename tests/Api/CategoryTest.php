@@ -103,4 +103,63 @@ class CategoryTest extends TestCase
             $this->response->getStatusCode()
         );
     }
+
+    public function testValidUpdate()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $this->json('GET', '/category', ['name' => 'testcat']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('PUT', '/category', ['id' => $nodeId, 'name' => 'testcatChanged']);
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/category', ['name' => 'testcat'])
+        ->seeJson([
+            'message' => 'Category "testcat" not found.',
+        ]);
+        $this->json('GET', '/category', ['name' => 'testcatChanged'])
+        ->seeJson([
+            'name' => 'testcatChanged',
+        ]);
+    }
+
+    public function testUpdateWithoutId()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $this->json('GET', '/category', ['name' => 'testcat']);
+        $this->json('PUT', '/category', ['name' => 'testcatChanged'])
+            ->seeJson([
+                'message' => 'Missing category node id.'
+            ]);
+        $this->assertEquals(
+            405,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/category', ['name' => 'testcatChanged'])
+        ->seeJson([
+            'message' => 'Category "testcatChanged" not found.',
+        ]);
+    }
+
+    public function testUpdateWithIdNotFound()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $this->json('GET', '/category', ['name' => 'testcat']);
+        $this->json('PUT', '/category', ['id' => 999, 'name' => 'testcatChanged'])
+            ->seeJson([
+                'message' => 'Category node with id "999" not found.'
+            ]);
+        $this->assertEquals(
+            404,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/category', ['name' => 'testcatChanged'])
+        ->seeJson([
+            'message' => 'Category "testcatChanged" not found.',
+        ]);
+    }
 }
