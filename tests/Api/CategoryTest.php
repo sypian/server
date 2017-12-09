@@ -15,7 +15,7 @@ class CategoryTest extends TestCase
         parent::setUp();
         $entityManager = app()->make('Neo4j\EntityManager');
         $query = $entityManager->createQuery('MATCH (n) DETACH DELETE n');
-        $result = $query->execute();
+        $query->execute();
     }
     /**
      * Returns a 200 for a correct post call.

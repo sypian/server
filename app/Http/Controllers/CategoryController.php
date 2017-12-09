@@ -9,7 +9,7 @@ use App\Models\Category;
 class CategoryController extends Controller
 {
     /**
-     * @return Response
+     * @return JsonResponse
      */
     public function createCategory(Request $request): JsonResponse
     {
@@ -21,11 +21,11 @@ class CategoryController extends Controller
             $entityManager->persist($category);
             $entityManager->flush();
 
-            $response = response()->json(['message' => $category->getId()], 200);
+            return response()->json(['message' => $category->getId()], 200);
         } elseif (count($request->all()) === 0) {
-            $response = response()->json(['message' => 'Empty request.'], 405);
+            return response()->json(['message' => 'Empty request.'], 405);
         } elseif (!$request->has('name')) {
-            $response = response()->json(['message' => 'No category name defined.'], 405);
+            return response()->json(['message' => 'No category name defined.'], 405);
         } elseif (count($request->except('name')) > 0) {
             $invalidParams = array_keys($request->except('name'));
 
@@ -37,19 +37,15 @@ class CategoryController extends Controller
                 }
 
                 $paramStr = trim($paramStr, ', ');
-                $message = sprintf('Properties %s not supported.', $paramStr);
-            } else {
-                $message = 'Property "'.reset($invalidParams).'" not supported.';
+                return response()->json(['message' => sprintf('Properties %s not supported.', $paramStr)], 405);
             }
 
-            $response = response()->json(['message' => $message], 405);
+            return response()->json(['message' => 'Property "'.reset($invalidParams).'" not supported.'], 405);
         }
-
-        return $response;
     }
 
     /**
-     * @return Response
+     * @return JsonResponse
      */
     public function getCategory(Request $request): JsonResponse
     {
@@ -59,38 +55,34 @@ class CategoryController extends Controller
         $category = $categoriesRepository->findOneBy(['name' => $name]);
 
         if ($category === null) {
-            $response = response()->json(['message' => 'Category "'.$name.'" not found.'], 404);
-        } else {
-            $response = response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
+            return response()->json(['message' => 'Category "'.$name.'" not found.'], 404);
         }
 
-        return $response;
+        return response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
     }
 
     /**
-     * @return Response
+     * @return JsonResponse
      */
     public function updateCategory(Request $request): JsonResponse
     {
         if (!$request->has('id')) {
-            $response = response()->json(['message' => 'Missing category node id.'], 405);
-        } else {
-            $id = $request->get('id');
-            $name = $request->get('name');
-            $entityManager = app()->make('Neo4j\EntityManager');
-            $categoriesRepository = $entityManager->getRepository(Category::class);
-            $category = $categoriesRepository->findOneById($id);
-
-            if ($category === null) {
-                $response = response()->json(['message' => 'Category node with id "'.$id.'" not found.'], 404);
-            } else {
-                $category->setName($name);
-                $entityManager->persist($category);
-                $entityManager->flush();
-                $response = response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
-            }
+            return response()->json(['message' => 'Missing category node id.'], 405);
         }
 
-        return $response;
+        $nodeId = $request->get('id');
+        $name = $request->get('name');
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $categoriesRepository = $entityManager->getRepository(Category::class);
+        $category = $categoriesRepository->findOneById($nodeId);
+
+        if ($category === null) {
+            return response()->json(['message' => 'Category node with id "'.$nodeId.'" not found.'], 404);
+        }
+
+        $category->setName($name);
+        $entityManager->persist($category);
+        $entityManager->flush();
+        return response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
     }
 }
