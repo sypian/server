@@ -161,4 +161,48 @@ class CategoryTest extends TestCase
             'message' => 'Category "testcatChanged" not found.',
         ]);
     }
+
+    public function testDeleteCategory()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $this->json('GET', '/category', ['name' => 'testcat']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('DELETE', '/category', ['id' => $nodeId])
+        ->seeJson([
+            'message' => 'Category node with id "'.$nodeId.'" got deleted.'
+        ]);
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/category', ['name' => 'testcat'])
+        ->seeJson([
+            'message' => 'Category "testcat" not found.',
+        ]);
+    }
+
+    public function testDeleteNotExistingCategory()
+    {
+        $this->json('DELETE', '/category', ['id' => 999])
+        ->seeJson([
+            'message' => 'Category node with id "999" not found.'
+        ]);
+        $this->assertEquals(
+            404,
+            $this->response->getStatusCode()
+        );
+    }
+
+    public function testDeleteCategoryWithoutId()
+    {
+        $this->json('DELETE', '/category', ['name' => 'testcat'])
+        ->seeJson([
+            'message' => 'Missing category node id.'
+        ]);
+        $this->assertEquals(
+            405,
+            $this->response->getStatusCode()
+        );
+    }
 }

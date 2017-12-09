@@ -24,3 +24,6 @@ $router->get('/category', [
 $router->put('/category', [
     'as' => 'category', 'uses' => 'CategoryController@updateCategory'
 ]);
+$router->delete('/category', [
+    'as' => 'category', 'uses' => 'CategoryController@deleteCategory'
+]);

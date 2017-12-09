@@ -85,4 +85,27 @@ class CategoryController extends Controller
         $entityManager->flush();
         return response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
     }
+
+    /**
+     * @return JsonResponse
+     */
+    public function deleteCategory(Request $request): JsonResponse
+    {
+        if (!$request->has('id')) {
+            return response()->json(['message' => 'Missing category node id.'], 405);
+        }
+
+        $nodeId = $request->get('id');
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $categoriesRepository = $entityManager->getRepository(Category::class);
+        $category = $categoriesRepository->findOneById($nodeId);
+
+        if ($category === null) {
+            return response()->json(['message' => 'Category node with id "'.$nodeId.'" not found.'], 404);
+        }
+
+        $entityManager->remove($category);
+        $entityManager->flush();
+        return response()->json(['message' => 'Category node with id "'.$nodeId.'" got deleted.']);
+    }
 }
