@@ -5,7 +5,10 @@ build:
 lint:
 	docker-compose run php-fpm phpcs
 
-test:
+clearlog:
+	echo "" > storage/logs/lumen.log
+
+test: clearlog
 	docker-compose run php-fpm phpunit --coverage-html coverage --coverage-clover clover.xml --coverage-text
 
 neo4j:
