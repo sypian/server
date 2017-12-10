@@ -77,16 +77,16 @@ class CategoryController extends Controller
         }
 
         $nodeId = $request->get('id');
-        $name = $request->get('name');
+
+        if (!$this->categoryExists($nodeId)) {
+            return response()->json(['message' => 'Category node with id "'.$nodeId.'" not found.'], 404);
+        }
+
         $entityManager = app()->make('Neo4j\EntityManager');
         $categoriesRepository = $entityManager->getRepository(Category::class);
         $category = $categoriesRepository->findOneById($nodeId);
 
-        if ($category === null) {
-            return response()->json(['message' => 'Category node with id "'.$nodeId.'" not found.'], 404);
-        }
-
-        $category->setName($name);
+        $category->setName($request->get('name'));
         $entityManager->persist($category);
         $entityManager->flush();
         return response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
@@ -102,16 +102,31 @@ class CategoryController extends Controller
         }
 
         $nodeId = $request->get('id');
+
+        if (!$this->categoryExists($nodeId)) {
+            return response()->json(['message' => 'Category node with id "'.$nodeId.'" not found.'], 404);
+        }
+
         $entityManager = app()->make('Neo4j\EntityManager');
         $categoriesRepository = $entityManager->getRepository(Category::class);
         $category = $categoriesRepository->findOneById($nodeId);
 
-        if ($category === null) {
-            return response()->json(['message' => 'Category node with id "'.$nodeId.'" not found.'], 404);
-        }
-
         $entityManager->remove($category);
         $entityManager->flush();
         return response()->json(['message' => 'Category node with id "'.$nodeId.'" got deleted.']);
+    }
+
+    /**
+     * Returns whether a category with the given node id exists in the database.
+     *
+     * @return bool
+     */
+    protected function categoryExists(string $nodeId): bool
+    {
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $categoriesRepository = $entityManager->getRepository(Category::class);
+        $category = $categoriesRepository->findOneById($nodeId);
+
+        return $category !== null;
     }
 }
