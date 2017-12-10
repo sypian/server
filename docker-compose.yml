@@ -9,6 +9,8 @@ services:
       - 8000:8000
     volumes:
       - .:/usr/src/app
+    environment:
+      - GIT_BRANCH:${TRAVIS_BRANCH-HEAD}
     links:
       - neo4j
 
