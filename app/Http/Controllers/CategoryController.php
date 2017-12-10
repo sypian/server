@@ -40,7 +40,10 @@ class CategoryController extends Controller
             $invalidParams = array_keys($request->except('name'));
 
             if (count($invalidParams) > 1) {
-                return response()->json(['message' => sprintf('Properties %s not supported.', $this->getFormattedParams($invalidParams))], 405);
+                return response()->json(
+                    ['message' => sprintf('Properties %s not supported.', $this->getFormattedParams($invalidParams))],
+                    405
+                );
             }
 
             return response()->json(['message' => 'Property "'.reset($invalidParams).'" not supported.'], 405);
