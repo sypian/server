@@ -22,7 +22,17 @@ class CategoryController extends Controller
             $entityManager->flush();
 
             return response()->json(['message' => $category->getId()], 200);
-        } elseif (count($request->all()) === 0) {
+        }
+
+        return $this->getErrorResponseOnCreate($request);
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    protected function getErrorResponseOnCreate(Request $request): JsonResponse
+    {
+        if (count($request->all()) === 0) {
             return response()->json(['message' => 'Empty request.'], 405);
         } elseif (!$request->has('name')) {
             return response()->json(['message' => 'No category name defined.'], 405);
@@ -30,14 +40,7 @@ class CategoryController extends Controller
             $invalidParams = array_keys($request->except('name'));
 
             if (count($invalidParams) > 1) {
-                $paramStr = '';
-
-                foreach ($invalidParams as $paramKey) {
-                    $paramStr .= '"'.$paramKey.'", ';
-                }
-
-                $paramStr = trim($paramStr, ', ');
-                return response()->json(['message' => sprintf('Properties %s not supported.', $paramStr)], 405);
+                return response()->json(['message' => sprintf('Properties %s not supported.', $this->getFormattedParams($invalidParams))], 405);
             }
 
             return response()->json(['message' => 'Property "'.reset($invalidParams).'" not supported.'], 405);
