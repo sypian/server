@@ -14,3 +14,16 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->post('/category', [
+    'as' => 'category', 'uses' => 'CategoryController@createCategory'
+]);
+$router->get('/category', [
+    'as' => 'category', 'uses' => 'CategoryController@getCategory'
+]);
+$router->put('/category', [
+    'as' => 'category', 'uses' => 'CategoryController@updateCategory'
+]);
+$router->delete('/category', [
+    'as' => 'category', 'uses' => 'CategoryController@deleteCategory'
+]);

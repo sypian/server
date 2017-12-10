@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <ruleset name="Sypian Standard" namespace="MyProject\CS\Standard">
 
- <description>Coding standard for sypian</description>
+    <description>Coding standard for sypian</description>
 
- <file>./app</file>
- <file>./tests</file>
+    <file>./app</file>
+    <file>./tests</file>
 
- <arg name="report" value="summary"/>
- <arg name="colors"/>
- <arg value="sp"/>
+    <arg name="report" value="full,summary"/>
+    <arg name="colors"/>
+    <arg value="sp"/>
 
- <rule ref="PSR2"/>
+    <rule ref="PSR2"/>
  </ruleset>
