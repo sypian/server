@@ -3,8 +3,6 @@ language: php
 env:
   global:
     - CC_TEST_REPORTER_ID=787a2f89b15c637323c7340d65ec17e898ac44480706b4b4122ea040c2a88f1d
-    - GIT_BRANCH=$TRAVIS_BRANCH
-    - GIT_COMMIT=$TRAVIS_COMMIT
 
 sudo: required
 
@@ -32,4 +30,4 @@ jobs:
         - docker-compose up -d neo4j
         - docker-compose run php-fpm ./bin/wait-for-neo4j.sh
         - make test
-        - docker-compose run php-fpm ./cc-test-reporter after-build --debug --coverage-input-type clover --exit-code $TRAVIS_TEST_RESULT -r $CC_TEST_REPORTER_ID
+        - docker-compose run php-fpm -e GIT_BRANCH=$TRAVIS_BRANCH -e GIT_COMMIT=$TRAVIS_COMMIT ./cc-test-reporter after-build --debug --coverage-input-type clover --exit-code $TRAVIS_TEST_RESULT -r $CC_TEST_REPORTER_ID
