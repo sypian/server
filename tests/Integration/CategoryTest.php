@@ -1,5 +1,5 @@
 <?php
-namespace Tests\Api;
+namespace Tests\Integration;
 
 use Tests\TestCase;
 
