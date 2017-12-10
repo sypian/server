@@ -28,6 +28,6 @@ jobs:
         - mv .env.travis .env
         - docker-compose up -d neo4j
         - docker-compose build
-        - ./bin/wait-for-neo4j.sh
+        - docker-compose run php-fpm ./bin/wait-for-neo4j.sh
         - make test
         - docker-compose run php-fpm ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT -r $CC_TEST_REPORTER_ID
