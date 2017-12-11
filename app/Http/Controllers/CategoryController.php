@@ -45,9 +45,9 @@ class CategoryController extends Controller
                     405
                 );
             }
-
-            return response()->json(['message' => 'Property "'.reset($invalidParams).'" not supported.'], 405);
         }
+
+        return response()->json(['message' => 'Property "'.reset($invalidParams).'" not supported.'], 405);
     }
 
     /**
