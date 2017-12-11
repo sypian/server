@@ -13,14 +13,6 @@ class CategoryController extends Controller
     /**
      * @return JsonResponse
      */
-    #public function createCategory(Request $request): JsonResponse
-    #{
-    #    return $this->createNode('Category', $request);
-    #}
-
-    /**
-     * @return JsonResponse
-     */
     public function getCategory(Request $request): JsonResponse
     {
         return $this->getNode('Category', $request);
