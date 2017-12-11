@@ -8,6 +8,40 @@ use App\Models\Category;
 
 class CategoryController extends Controller
 {
+    use NodeControllerTrait;
+
+    /**
+     * @return JsonResponse
+     */
+    #public function createCategory(Request $request): JsonResponse
+    #{
+    #    return $this->createNode('Category', $request);
+    #}
+
+    /**
+     * @return JsonResponse
+     */
+    public function getCategory(Request $request): JsonResponse
+    {
+        return $this->getNode('Category', $request);
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function updateCategory(Request $request): JsonResponse
+    {
+        return $this->updateNode('Category', $request);
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function deleteCategory(Request $request): JsonResponse
+    {
+        return $this->deleteNode('Category', $request);
+    }
+
     /**
      * @return JsonResponse
      */
@@ -48,85 +82,5 @@ class CategoryController extends Controller
         }
 
         return response()->json(['message' => 'Property "'.reset($invalidParams).'" not supported.'], 405);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    public function getCategory(Request $request): JsonResponse
-    {
-        $name = $request->get('name');
-        $entityManager = app()->make('Neo4j\EntityManager');
-        $categoriesRepository = $entityManager->getRepository(Category::class);
-        $category = $categoriesRepository->findOneBy(['name' => $name]);
-
-        if ($category === null) {
-            return response()->json(['message' => 'Category "'.$name.'" not found.'], 404);
-        }
-
-        return response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    public function updateCategory(Request $request): JsonResponse
-    {
-        if (!$request->has('id')) {
-            return response()->json(['message' => 'Missing category node id.'], 405);
-        }
-
-        $nodeId = $request->get('id');
-
-        if (!$this->categoryExists($nodeId)) {
-            return response()->json(['message' => 'Category node with id "'.$nodeId.'" not found.'], 404);
-        }
-
-        $entityManager = app()->make('Neo4j\EntityManager');
-        $categoriesRepository = $entityManager->getRepository(Category::class);
-        $category = $categoriesRepository->findOneById($nodeId);
-
-        $category->setName($request->get('name'));
-        $entityManager->persist($category);
-        $entityManager->flush();
-        return response()->json(['name' => $category->getName(), 'id' => $category->getId()]);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    public function deleteCategory(Request $request): JsonResponse
-    {
-        if (!$request->has('id')) {
-            return response()->json(['message' => 'Missing category node id.'], 405);
-        }
-
-        $nodeId = $request->get('id');
-
-        if (!$this->categoryExists($nodeId)) {
-            return response()->json(['message' => 'Category node with id "'.$nodeId.'" not found.'], 404);
-        }
-
-        $entityManager = app()->make('Neo4j\EntityManager');
-        $categoriesRepository = $entityManager->getRepository(Category::class);
-        $category = $categoriesRepository->findOneById($nodeId);
-
-        $entityManager->remove($category);
-        $entityManager->flush();
-        return response()->json(['message' => 'Category node with id "'.$nodeId.'" got deleted.']);
-    }
-
-    /**
-     * Returns whether a category with the given node id exists in the database.
-     *
-     * @return bool
-     */
-    protected function categoryExists(string $nodeId): bool
-    {
-        $entityManager = app()->make('Neo4j\EntityManager');
-        $categoriesRepository = $entityManager->getRepository(Category::class);
-        $category = $categoriesRepository->findOneById($nodeId);
-
-        return $category !== null;
     }
 }

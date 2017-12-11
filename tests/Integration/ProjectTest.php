@@ -42,7 +42,7 @@ class ProjectTest extends TestCase
     {
         $this->json('POST', '/project', ['nameeee' => 'project1'])
             ->seeJson([
-                'message' => 'No project name defined.',
+                'message' => 'No Project name defined.',
             ]);
 
         $this->assertEquals(
@@ -104,7 +104,7 @@ class ProjectTest extends TestCase
         $this->json('GET', '/project', ['name' => 'project1']);
         $this->json('PUT', '/project', ['name' => 'project1Changed'])
             ->seeJson([
-                'message' => 'Missing project node id.'
+                'message' => 'Missing Project node id.'
             ]);
         $this->assertEquals(
             405,
@@ -172,7 +172,7 @@ class ProjectTest extends TestCase
     {
         $this->json('DELETE', '/project', ['name' => 'project1'])
         ->seeJson([
-            'message' => 'Missing project node id.'
+            'message' => 'Missing Project node id.'
         ]);
         $this->assertEquals(
             405,
