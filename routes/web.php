@@ -27,3 +27,16 @@ $router->put('/category', [
 $router->delete('/category', [
     'as' => 'category', 'uses' => 'CategoryController@deleteCategory'
 ]);
+
+$router->post('/project', [
+    'as' => 'project', 'uses' => 'ProjectController@createProject'
+]);
+$router->get('/project', [
+    'as' => 'project', 'uses' => 'ProjectController@getProject'
+]);
+$router->put('/project', [
+    'as' => 'project', 'uses' => 'ProjectController@updateProject'
+]);
+$router->delete('/project', [
+    'as' => 'project', 'uses' => 'ProjectController@deleteProject'
+]);
