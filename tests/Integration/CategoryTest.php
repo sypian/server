@@ -130,7 +130,7 @@ class CategoryTest extends TestCase
         $this->json('GET', '/category', ['name' => 'testcat']);
         $this->json('PUT', '/category', ['name' => 'testcatChanged'])
             ->seeJson([
-                'message' => 'Missing category node id.'
+                'message' => 'Missing Category node id.'
             ]);
         $this->assertEquals(
             405,
@@ -198,7 +198,7 @@ class CategoryTest extends TestCase
     {
         $this->json('DELETE', '/category', ['name' => 'testcat'])
         ->seeJson([
-            'message' => 'Missing category node id.'
+            'message' => 'Missing Category node id.'
         ]);
         $this->assertEquals(
             405,
