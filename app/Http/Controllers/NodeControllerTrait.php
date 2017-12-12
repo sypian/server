@@ -18,15 +18,21 @@ trait NodeControllerTrait
     public function createNode(string $label, Request $request): JsonResponse
     {
         if ($request->has('name')) {
-            $class = 'App\Models\\'.$label;
-            $node = new $class();
-            $node->setName($request->get('name'));
+            $name = $request->get('name');
 
-            $entityManager = app()->make('Neo4j\EntityManager');
-            $entityManager->persist($node);
-            $entityManager->flush();
+            if (!$this->nodeWithNameExists($label, $name)) {
+                $class = 'App\Models\\'.$label;
+                $node = new $class();
+                $node->setName($name);
 
-            return response()->json(['message' => $node->getId()], 200);
+                $entityManager = app()->make('Neo4j\EntityManager');
+                $entityManager->persist($node);
+                $entityManager->flush();
+
+                return response()->json(['message' => $node->getId()], 201);
+            }
+
+            return response()->json(['message' => $label.' with name "'.$name.'" already exists.'], 409);
         }
 
         return response()->json(['message' => 'No '.$label.' name defined.'], 405);
@@ -60,7 +66,7 @@ trait NodeControllerTrait
 
         $nodeId = $request->get('id');
 
-        if (!$this->nodeExists($label, $nodeId)) {
+        if (!$this->nodeWithIdExists($label, $nodeId)) {
             return response()->json(['message' => $label.' node with id "'.$nodeId.'" not found.'], 404);
         }
 
@@ -85,7 +91,7 @@ trait NodeControllerTrait
 
         $nodeId = $request->get('id');
 
-        if (!$this->nodeExists($label, $nodeId)) {
+        if (!$this->nodeWithIdExists($label, $nodeId)) {
             return response()->json(['message' => $label.' node with id "'.$nodeId.'" not found.'], 404);
         }
 
@@ -103,11 +109,25 @@ trait NodeControllerTrait
      *
      * @return bool
      */
-    protected function nodeExists(string $label, string $nodeId): bool
+    protected function nodeWithIdExists(string $label, string $nodeId): bool
     {
         $entityManager = app()->make('Neo4j\EntityManager');
         $categoriesRepository = $entityManager->getRepository('App\Models\\'.$label);
         $node = $categoriesRepository->findOneById($nodeId);
+
+        return $node !== null;
+    }
+
+    /**
+     * Returns whether a node with the given name exists in the database.
+     *
+     * @return bool
+     */
+    protected function nodeWithNameExists(string $label, string $name): bool
+    {
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $categoriesRepository = $entityManager->getRepository('App\Models\\'.$label);
+        $node = $categoriesRepository->findOneBy(['name' => $name]);
 
         return $node !== null;
     }
