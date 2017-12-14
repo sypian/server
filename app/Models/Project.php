@@ -25,9 +25,9 @@ class Project
     protected $name;
 
     /**
-     * @var Category[]|Collection
+     * @var ProjectCategory[]
      *
-     * @OGM\Relationship(type="BELONGS_TO", direction="OUTGOING", collection=true, mappedBy="projects", targetEntity="Category")
+     * @OGM\Relationship(relationshipEntity="ProjectCategory", type="BELONGS_TO", direction="INCOMING", collection=true, mappedBy="category")
      */
     protected $categories;
 
@@ -52,7 +52,7 @@ class Project
     }
 
     /**
-     * @return Category[]|Collection
+     * @return ProjectCategory[]|Collection
      */
     public function getCategories()
     {
