@@ -198,4 +198,58 @@ class ProjectTest extends TestCase
             $this->response->getStatusCode()
         );
     }
+
+    /**
+     * Returns a 405 for trying to create a project with a non existing category.
+     *
+     * @return void
+     */
+    public function testCreateWithNotExistingCategory()
+    {
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']])->seeJson([
+            'message' => 'Category "testcat" does not exist.'
+        ]);
+        $this->assertEquals(
+            405,
+            $this->response->getStatusCode()
+        );
+    }
+
+    /**
+     * Returns a 201 for trying to create a project with an existing category.
+     *
+     * @return void
+     */
+    public function testCreateWithExistingCategory()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']]);
+        $this->assertEquals(
+            201,
+            $this->response->getStatusCode()
+        );
+    }
+
+    /**
+     * Returns the names of the related categories of a project.
+     *
+     * @return void
+     */
+    public function testGetProjectWithCategories()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat1']);
+        $this->json('POST', '/category', ['name' => 'testcat2']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
+
+        $this->json('GET', '/project', ['name' => 'project1'])
+             ->seeJson([
+                 'name' => 'project1',
+                 'categories' => ['testcat1', 'testcat2']
+             ]);
+        $this->assertArrayHasKey('id', $this->response->getData(true));
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+    }
 }
