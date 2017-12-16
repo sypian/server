@@ -17,19 +17,36 @@ trait NodeControllerTrait
      */
     public function createNode(string $label, Request $request): JsonResponse
     {
+        $response = $this->verifyNodeByName($label, $request);
+
+        if ($response !== null) {
+            return $response;
+        }
+
+        $class = 'App\Models\\'.$label;
+        $node = new $class();
+        $node->setName($request->get('name'));
+
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $entityManager->persist($node);
+        $entityManager->flush();
+
+        return response()->json(['message' => $node->getId()], 201);
+    }
+
+    /**
+     * Verifies a node from a request using a given name and returns a failure response or null
+     * if the request is ok.
+     *
+     * @return null|JsonResponse
+     */
+    public function verifyNodeByName(string $label, Request $request): ?JsonResponse
+    {
         if ($request->has('name')) {
             $name = $request->get('name');
 
             if (!$this->nodeWithNameExists($label, $name)) {
-                $class = 'App\Models\\'.$label;
-                $node = new $class();
-                $node->setName($name);
-
-                $entityManager = app()->make('Neo4j\EntityManager');
-                $entityManager->persist($node);
-                $entityManager->flush();
-
-                return response()->json(['message' => $node->getId()], 201);
+                return null;
             }
 
             return response()->json(['message' => $label.' with name "'.$name.'" already exists.'], 409);
