@@ -252,4 +252,26 @@ class ProjectTest extends TestCase
             $this->response->getStatusCode()
         );
     }
+
+    public function testDeleteProjectWithCategories()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat1']);
+        $this->json('POST', '/category', ['name' => 'testcat2']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
+        $this->json('GET', '/project', ['name' => 'project1']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('DELETE', '/project', ['id' => $nodeId])
+        ->seeJson([
+            'message' => 'Project node with id "'.$nodeId.'" got deleted.'
+        ]);
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/project', ['name' => 'project1'])
+        ->seeJson([
+            'message' => 'Project "project1" not found.',
+        ]);
+    }
 }
