@@ -59,8 +59,19 @@ class Project
         return $this->categories;
     }
 
+    /**
+     * Adds a category as a relationship.
+     *
+     * If the category is already related, it wont add the category again.
+     */
     public function belongsTo(Category $category)
     {
+        foreach ($this->getCategories() as $categoryRelation) {
+            if ($category === $categoryRelation->getCategory()) {
+                return;
+            }
+        }
+
         $relation = new ProjectCategory($this, $category);
         $category->getProjects()->add($relation);
         $this->getCategories()->add($relation);
