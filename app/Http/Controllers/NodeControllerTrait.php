@@ -77,16 +77,13 @@ trait NodeControllerTrait
      */
     public function updateNode(string $label, Request $request): JsonResponse
     {
-        if (!$request->has('id')) {
-            return response()->json(['message' => 'Missing '.$label.' node id.'], 405);
+        $response = $this->verifyNodeById($label, $request);
+
+        if ($response !== null) {
+            return $response;
         }
 
         $nodeId = $request->get('id');
-
-        if (!$this->nodeWithIdExists($label, $nodeId)) {
-            return response()->json(['message' => $label.' node with id "'.$nodeId.'" not found.'], 404);
-        }
-
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
         $node = $nodesRepository->findOneById($nodeId);
@@ -98,9 +95,12 @@ trait NodeControllerTrait
     }
 
     /**
-     * @return JsonResponse
+     * Verifies a node from a request using a given id and returns a failure response or null
+     * if the request is ok.
+     *
+     * @return null|JsonResponse
      */
-    public function deleteNode(string $label, Request $request): JsonResponse
+    public function verifyNodeById(string $label, Request $request): ?JsonResponse
     {
         if (!$request->has('id')) {
             return response()->json(['message' => 'Missing '.$label.' node id.'], 405);
@@ -112,13 +112,7 @@ trait NodeControllerTrait
             return response()->json(['message' => $label.' node with id "'.$nodeId.'" not found.'], 404);
         }
 
-        $entityManager = app()->make('Neo4j\EntityManager');
-        $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
-        $node = $nodesRepository->findOneById($nodeId);
-
-        $entityManager->remove($node);
-        $entityManager->flush();
-        return response()->json(['message' => $label.' node with id "'.$nodeId.'" got deleted.']);
+        return null;
     }
 
     /**

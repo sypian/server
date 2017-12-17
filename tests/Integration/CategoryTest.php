@@ -198,4 +198,25 @@ class CategoryTest extends TestCase
             $this->response->getStatusCode()
         );
     }
+
+    public function testDeleteCategoryWithConfiguredProject()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']]);
+        $this->json('GET', '/category', ['name' => 'testcat']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('DELETE', '/category', ['id' => $nodeId])
+        ->seeJson([
+            'message' => 'Category node with id "'.$nodeId.'" got deleted.'
+        ]);
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/category', ['name' => 'testcat'])
+        ->seeJson([
+            'message' => 'Category "testcat" not found.',
+        ]);
+    }
 }

@@ -16,37 +16,33 @@ class ProjectController extends Controller
      */
     public function createProject(Request $request): JsonResponse
     {
-        if ($request->has('name')) {
-            $name = $request->get('name');
+        $response = $this->verifyNodeByName('Project', $request);
 
-            if (!$this->nodeWithNameExists('Project', $name)) {
-                $entityManager = app()->make('Neo4j\EntityManager');
-                $project = new Project();
-                $project->setName($name);
-
-                if ($request->has('categories')) {
-                    $categoriesRepo = $entityManager->getRepository(Category::class);
-
-                    foreach ($request->get('categories') as $categoryName) {
-                        if ($this->nodeWithNameExists('Category', $categoryName)) {
-                            $category = $categoriesRepo->findOneBy(['name' => $categoryName]);
-                            $project->belongsTo($category);
-                        } else {
-                            return response()->json(['message' => 'Category "'.$categoryName.'" does not exist.'], 405);
-                        }
-                    }
-                }
-
-                $entityManager->persist($project);
-                $entityManager->flush();
-
-                return response()->json(['message' => $project->getId()], 201);
-            }
-
-            return response()->json(['message' => 'Project'.' with name "'.$name.'" already exists.'], 409);
+        if ($response !== null) {
+            return $response;
         }
 
-        return response()->json(['message' => 'No '.'Project'.' name defined.'], 405);
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $project = new Project();
+        $project->setName($request->get('name'));
+
+        if ($request->has('categories')) {
+            $categoriesRepo = $entityManager->getRepository(Category::class);
+
+            foreach ($request->get('categories') as $categoryName) {
+                if ($this->nodeWithNameExists('Category', $categoryName)) {
+                    $category = $categoriesRepo->findOneBy(['name' => $categoryName]);
+                    $project->belongsTo($category);
+                } else {
+                    return response()->json(['message' => 'Category "'.$categoryName.'" does not exist.'], 405);
+                }
+            }
+        }
+
+        $entityManager->persist($project);
+        $entityManager->flush();
+
+        return response()->json(['message' => $project->getId()], 201);
     }
 
     /**
@@ -55,14 +51,14 @@ class ProjectController extends Controller
     public function getProject(Request $request): JsonResponse
     {
         $name = $request->get('name');
-        $entityManager = app()->make('Neo4j\EntityManager');
-        $nodesRepository = $entityManager->getRepository(Project::class);
-        $node = $nodesRepository->findOneBy(['name' => $name]);
 
-        if ($node === null) {
+        if (!$this->nodeWithNameExists('Project', $name)) {
             return response()->json(['message' => 'Project "'.$name.'" not found.'], 404);
         }
 
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $nodesRepository = $entityManager->getRepository(Project::class);
+        $node = $nodesRepository->findOneBy(['name' => $name]);
         $categories = [];
 
         foreach ($node->getCategories() as $projectCategory) {
@@ -77,16 +73,13 @@ class ProjectController extends Controller
      */
     public function updateProject(Request $request): JsonResponse
     {
-        if (!$request->has('id')) {
-            return response()->json(['message' => 'Missing Project node id.'], 405);
+        $response = $this->verifyNodeById('Project', $request);
+
+        if ($response !== null) {
+            return $response;
         }
 
         $nodeId = $request->get('id');
-
-        if (!$this->nodeWithIdExists('Project', $nodeId)) {
-            return response()->json(['message' => 'Project node with id "'.$nodeId.'" not found.'], 404);
-        }
-
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository(Project::class);
         $project = $nodesRepository->findOneById($nodeId);
@@ -119,16 +112,13 @@ class ProjectController extends Controller
      */
     public function deleteProject(Request $request): JsonResponse
     {
-        if (!$request->has('id')) {
-            return response()->json(['message' => 'Missing Project node id.'], 405);
+        $response = $this->verifyNodeById('Project', $request);
+
+        if ($response !== null) {
+            return $response;
         }
 
         $nodeId = $request->get('id');
-
-        if (!$this->nodeWithIdExists('Project', $nodeId)) {
-            return response()->json(['message' => 'Project node with id "'.$nodeId.'" not found.'], 404);
-        }
-
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository(Project::class);
         $project = $nodesRepository->findOneById($nodeId);

@@ -39,6 +39,37 @@ class CategoryController extends Controller
      */
     public function deleteCategory(Request $request): JsonResponse
     {
-        return $this->deleteNode('Category', $request);
+        $response = $this->verifyNodeById('Category', $request);
+
+        if ($response !== null) {
+            return $response;
+        }
+
+        $nodeId = $request->get('id');
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $nodesRepository = $entityManager->getRepository(Category::class);
+        $category = $nodesRepository->findOneById($nodeId);
+
+        // Relations between the category and categories have to be removed first!
+        $this->removeProjectCategoryRelations($category);
+
+        $entityManager->remove($category);
+        $entityManager->flush();
+        return response()->json(['message' => 'Category node with id "'.$nodeId.'" got deleted.']);
+    }
+
+    public function removeProjectCategoryRelations($category)
+    {
+        $entityManager = app()->make('Neo4j\EntityManager');
+
+        foreach ($category->getProjects() as $projectCategory) {
+            $category->getProjects()->removeElement($projectCategory);
+            $project = $projectCategory->getProject();
+            $project->getCategories()->removeElement($projectCategory);
+            $entityManager->persist($category);
+            $entityManager->persist($project);
+            $entityManager->remove($projectCategory);
+            $entityManager->flush();
+        }
     }
 }
