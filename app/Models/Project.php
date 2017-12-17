@@ -27,7 +27,8 @@ class Project
     /**
      * @var ProjectCategory[]
      *
-     * @OGM\Relationship(relationshipEntity="ProjectCategory", type="BELONGS_TO", direction="OUTGOING", collection=true, mappedBy="category")
+     * @OGM\Relationship(relationshipEntity="ProjectCategory", type="BELONGS_TO",
+     * direction="OUTGOING", collection=true, mappedBy="category")
      */
     protected $categories;
 

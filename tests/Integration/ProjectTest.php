@@ -282,7 +282,11 @@ class ProjectTest extends TestCase
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1']]);
         $this->json('GET', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/project', ['id' => $nodeId, 'name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
+        $this->json('PUT', '/project', [
+            'id' => $nodeId,
+            'name' => 'project1',
+            'categories' => ['testcat1', 'testcat2'],
+        ]);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
@@ -301,7 +305,11 @@ class ProjectTest extends TestCase
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1']]);
         $this->json('GET', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/project', ['id' => $nodeId, 'name' => 'project1', 'categories' => ['testcat1', 'testcatFail']])
+        $this->json('PUT', '/project', [
+            'id' => $nodeId,
+            'name' => 'project1',
+            'categories' => ['testcat1', 'testcatFail'],
+        ])
         ->seeJson([
             'message' => 'Category "testcatFail" not found.',
         ]);

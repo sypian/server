@@ -106,7 +106,6 @@ class ProjectController extends Controller
                 $category = $categoryRepository->findOneBy(['name' => $categoryName]);
                 $project->belongsTo($category);
             }
-
         }
 
         $project->setName($request->get('name'));
