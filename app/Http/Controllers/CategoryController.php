@@ -13,10 +13,10 @@ class CategoryController extends Controller
     /**
      * @return JsonResponse
      */
-    #public function createCategory(Request $request): JsonResponse
-    #{
-    #    return $this->createNode('Category', $request);
-    #}
+    public function createCategory(Request $request): JsonResponse
+    {
+        return $this->createNode('Category', $request);
+    }
 
     /**
      * @return JsonResponse
@@ -39,48 +39,37 @@ class CategoryController extends Controller
      */
     public function deleteCategory(Request $request): JsonResponse
     {
-        return $this->deleteNode('Category', $request);
+        $response = $this->verifyNodeById('Category', $request);
+
+        if ($response !== null) {
+            return $response;
+        }
+
+        $nodeId = $request->get('id');
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $nodesRepository = $entityManager->getRepository(Category::class);
+        $category = $nodesRepository->findOneById($nodeId);
+
+        // Relations between the category and categories have to be removed first!
+        $this->removeProjectCategoryRelations($category);
+
+        $entityManager->remove($category);
+        $entityManager->flush();
+        return response()->json(['message' => 'Category node with id "'.$nodeId.'" got deleted.']);
     }
 
-    /**
-     * @return JsonResponse
-     */
-    public function createCategory(Request $request): JsonResponse
+    public function removeProjectCategoryRelations($category)
     {
-        if ($request->has('name') && count($request->except('name')) === 0) {
-            $category = new Category();
-            $category->setName($request->get('name'));
+        $entityManager = app()->make('Neo4j\EntityManager');
 
-            $entityManager = app()->make('Neo4j\EntityManager');
+        foreach ($category->getProjects() as $projectCategory) {
+            $category->getProjects()->removeElement($projectCategory);
+            $project = $projectCategory->getProject();
+            $project->getCategories()->removeElement($projectCategory);
             $entityManager->persist($category);
+            $entityManager->persist($project);
+            $entityManager->remove($projectCategory);
             $entityManager->flush();
-
-            return response()->json(['message' => $category->getId()], 200);
         }
-
-        return $this->getErrorResponseOnCreate($request);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    protected function getErrorResponseOnCreate(Request $request): JsonResponse
-    {
-        if (count($request->all()) === 0) {
-            return response()->json(['message' => 'Empty request.'], 405);
-        } elseif (!$request->has('name')) {
-            return response()->json(['message' => 'No category name defined.'], 405);
-        } elseif (count($request->except('name')) > 0) {
-            $invalidParams = array_keys($request->except('name'));
-
-            if (count($invalidParams) > 1) {
-                return response()->json(
-                    ['message' => sprintf('Properties %s not supported.', $this->getFormattedParams($invalidParams))],
-                    405
-                );
-            }
-        }
-
-        return response()->json(['message' => 'Property "'.reset($invalidParams).'" not supported.'], 405);
     }
 }

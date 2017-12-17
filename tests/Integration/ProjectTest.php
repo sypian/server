@@ -19,7 +19,7 @@ class ProjectTest extends TestCase
     }
 
     /**
-     * Returns a 200 for a correct post call.
+     * Returns a 201 for a correct post call.
      *
      * @return void
      */
@@ -28,17 +28,17 @@ class ProjectTest extends TestCase
         $this->json('POST', '/project', ['name' => 'project1']);
 
         $this->assertEquals(
-            200,
+            201,
             $this->response->getStatusCode()
         );
     }
 
     /**
-     * Returns a 405 for an invalid input.
+     * Returns a 405 if we dont pass a name.
      *
      * @return void
      */
-    public function testInvalidPostInput()
+    public function testCreateWithoutName()
     {
         $this->json('POST', '/project', ['nameeee' => 'project1'])
             ->seeJson([
@@ -47,6 +47,25 @@ class ProjectTest extends TestCase
 
         $this->assertEquals(
             405,
+            $this->response->getStatusCode()
+        );
+    }
+
+    /**
+     * Returns a 409 if the project to create already exists.
+     *
+     * @return void
+     */
+    public function testCreateDuplicate()
+    {
+        $this->json('POST', '/project', ['name' => 'project1']);
+        $this->json('POST', '/project', ['name' => 'project1'])
+            ->seeJson([
+                'message' => 'Project with name "project1" already exists.',
+            ]);
+
+        $this->assertEquals(
+            409,
             $this->response->getStatusCode()
         );
     }
@@ -178,5 +197,151 @@ class ProjectTest extends TestCase
             405,
             $this->response->getStatusCode()
         );
+    }
+
+    /**
+     * Returns a 405 for trying to create a project with a non existing category.
+     *
+     * @return void
+     */
+    public function testCreateWithNotExistingCategory()
+    {
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']])->seeJson([
+            'message' => 'Category "testcat" does not exist.'
+        ]);
+        $this->assertEquals(
+            405,
+            $this->response->getStatusCode()
+        );
+    }
+
+    /**
+     * Returns a 201 for trying to create a project with an existing category.
+     *
+     * @return void
+     */
+    public function testCreateWithExistingCategory()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']]);
+        $this->assertEquals(
+            201,
+            $this->response->getStatusCode()
+        );
+    }
+
+    /**
+     * Returns the names of the related categories of a project.
+     *
+     * @return void
+     */
+    public function testGetProjectWithCategories()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat1']);
+        $this->json('POST', '/category', ['name' => 'testcat2']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
+
+        $this->json('GET', '/project', ['name' => 'project1'])
+             ->seeJson([
+                 'name' => 'project1',
+                 'categories' => ['testcat1', 'testcat2']
+             ]);
+        $this->assertArrayHasKey('id', $this->response->getData(true));
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+    }
+
+    public function testDeleteProjectWithCategories()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat1']);
+        $this->json('POST', '/category', ['name' => 'testcat2']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
+        $this->json('GET', '/project', ['name' => 'project1']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('DELETE', '/project', ['id' => $nodeId])
+        ->seeJson([
+            'message' => 'Project node with id "'.$nodeId.'" got deleted.'
+        ]);
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/project', ['name' => 'project1'])
+        ->seeJson([
+            'message' => 'Project "project1" not found.',
+        ]);
+    }
+
+    public function testUpdateAddCategory()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat1']);
+        $this->json('POST', '/category', ['name' => 'testcat2']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1']]);
+        $this->json('GET', '/project', ['name' => 'project1']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('PUT', '/project', [
+            'id' => $nodeId,
+            'name' => 'project1',
+            'categories' => ['testcat1', 'testcat2'],
+        ]);
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/project', ['name' => 'project1'])
+        ->seeJson([
+            'name' => 'project1',
+            'categories' => ['testcat1', 'testcat2'],
+        ]);
+    }
+
+    public function testUpdateAddNotExistingCategory()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat1']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1']]);
+        $this->json('GET', '/project', ['name' => 'project1']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('PUT', '/project', [
+            'id' => $nodeId,
+            'name' => 'project1',
+            'categories' => ['testcat1', 'testcatFail'],
+        ])
+        ->seeJson([
+            'message' => 'Category "testcatFail" not found.',
+        ]);
+        $this->assertEquals(
+            404,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/project', ['name' => 'project1'])
+        ->seeJson([
+            'name' => 'project1',
+            'categories' => ['testcat1'],
+        ]);
+    }
+
+    public function testUpdateRemoveCategory()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat1']);
+        $this->json('POST', '/category', ['name' => 'testcat2']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
+        $this->json('GET', '/project', ['name' => 'project1']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('PUT', '/project', ['id' => $nodeId, 'name' => 'project1', 'categories' => ['testcat2']]);
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/project', ['name' => 'project1'])
+        ->seeJson([
+            'name' => 'project1',
+            'categories' => ['testcat2'],
+        ]);
     }
 }

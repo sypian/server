@@ -17,8 +17,9 @@ class CategoryTest extends TestCase
         $query = $entityManager->createQuery('MATCH (n) DETACH DELETE n');
         $query->execute();
     }
+
     /**
-     * Returns a 200 for a correct post call.
+     * Returns a 201 for a correct post call.
      *
      * @return void
      */
@@ -27,23 +28,21 @@ class CategoryTest extends TestCase
         $this->json('POST', '/category', ['name' => 'testcat']);
 
         $this->assertEquals(
-            200,
+            201,
             $this->response->getStatusCode()
         );
     }
 
     /**
-     * Returns a 405 for an invalid input.
+     * Returns a 405 if we dont pass a name.
      *
      * @return void
-     *
-     * @dataProvider getInvalidPostInputs
      */
-    public function testInvalidPostInputs($input, $responseContent)
+    public function testCreateWithoutName()
     {
-        $this->json('POST', '/category', $input)
+        $this->json('POST', '/category', ['nameeee' => 'testcat'])
             ->seeJson([
-                'message' => $responseContent,
+                'message' => 'No Category name defined.',
             ]);
 
         $this->assertEquals(
@@ -53,28 +52,22 @@ class CategoryTest extends TestCase
     }
 
     /**
-     * @return mixed[]
+     * Returns a 409 if the project to create already exists.
+     *
+     * @return void
      */
-    public function getInvalidPostInputs(): array
+    public function testCreateDuplicate()
     {
-        return [
-            [
-                ['keyyy' => 'testcat', 'falseproperty' => 'test'],
-                'No category name defined.',
-            ],
-            [
-                ['name' => 'testcat', 'falseproperty' => 'test'],
-                'Property "falseproperty" not supported.',
-            ],
-            [
-                ['name' => 'testcat', 'falseproperty1' => 'test', 'falseproperty2' => 'test'],
-                'Properties "falseproperty1", "falseproperty2" not supported.',
-            ],
-            [
-                [],
-                'Empty request.',
-            ]
-        ];
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $this->json('POST', '/category', ['name' => 'testcat'])
+            ->seeJson([
+                'message' => 'Category with name "testcat" already exists.',
+            ]);
+
+        $this->assertEquals(
+            409,
+            $this->response->getStatusCode()
+        );
     }
 
     public function testValidGetRequest()
@@ -204,5 +197,26 @@ class CategoryTest extends TestCase
             405,
             $this->response->getStatusCode()
         );
+    }
+
+    public function testDeleteCategoryWithConfiguredProject()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']]);
+        $this->json('GET', '/category', ['name' => 'testcat']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('DELETE', '/category', ['id' => $nodeId])
+        ->seeJson([
+            'message' => 'Category node with id "'.$nodeId.'" got deleted.'
+        ]);
+        $this->assertEquals(
+            200,
+            $this->response->getStatusCode()
+        );
+
+        $this->json('GET', '/category', ['name' => 'testcat'])
+        ->seeJson([
+            'message' => 'Category "testcat" not found.',
+        ]);
     }
 }
