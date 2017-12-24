@@ -34,7 +34,8 @@ class ProjectController extends Controller
                     $category = $categoriesRepo->findOneBy(['name' => $categoryName]);
                     $project->belongsTo($category);
                 } else {
-                    return response()->json(['message' => 'Category "'.$categoryName.'" does not exist.'], 405);
+                    $this->addError('Category "'.$categoryName.'" does not exist.');
+                    return $this->generateJsonResponse(405);
                 }
             }
         }
@@ -42,7 +43,8 @@ class ProjectController extends Controller
         $entityManager->persist($project);
         $entityManager->flush();
 
-        return response()->json(['message' => $project->getId()], 201);
+        $this->addError($project->getId());
+        return $this->generateJsonResponse(201);
     }
 
     /**
@@ -53,7 +55,8 @@ class ProjectController extends Controller
         $name = $request->get('name');
 
         if (!$this->nodeWithNameExists('Project', $name)) {
-            return response()->json(['message' => 'Project "'.$name.'" not found.'], 404);
+            $this->addError('Project "'.$name.'" not found.');
+            return $this->generateJsonResponse(404);
         }
 
         $entityManager = app()->make('Neo4j\EntityManager');
@@ -89,7 +92,8 @@ class ProjectController extends Controller
 
             foreach ($request->get('categories') as $categoryName) {
                 if (!$this->nodeWithNameExists('Category', $categoryName)) {
-                    return response()->json(['message' => 'Category "'.$categoryName.'" not found.'], 404);
+                    $this->addError('Category "'.$categoryName.'" not found.');
+                    return $this->generateJsonResponse(404);
                 }
             }
 

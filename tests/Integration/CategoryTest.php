@@ -42,7 +42,11 @@ class CategoryTest extends TestCase
     {
         $this->json('POST', '/category', ['nameeee' => 'testcat'])
             ->seeJson([
-                'message' => 'No Category name defined.',
+                'errors' => [
+                    [
+                        'message' => 'No Category name defined.',
+                    ]
+                ],
             ]);
 
         $this->assertEquals(
@@ -61,7 +65,11 @@ class CategoryTest extends TestCase
         $this->json('POST', '/category', ['name' => 'testcat']);
         $this->json('POST', '/category', ['name' => 'testcat'])
             ->seeJson([
-                'message' => 'Category with name "testcat" already exists.',
+                'errors' => [
+                    [
+                        'message' => 'Category with name "testcat" already exists.',
+                    ]
+                ],
             ]);
 
         $this->assertEquals(
@@ -88,7 +96,11 @@ class CategoryTest extends TestCase
     {
         $this->json('GET', '/category', ['name' => 'nocategory'])
                 ->seeJson([
-                    'message' => 'Category "nocategory" not found.',
+                    'errors' => [
+                        [
+                            'message' => 'Category "nocategory" not found.',
+                        ],
+                    ]
                 ]);
         $this->assertEquals(
             404,
@@ -109,7 +121,11 @@ class CategoryTest extends TestCase
 
         $this->json('GET', '/category', ['name' => 'testcat'])
         ->seeJson([
-            'message' => 'Category "testcat" not found.',
+            'errors' => [
+                [
+                    'message' => 'Category "testcat" not found.',
+                ],
+            ]
         ]);
         $this->json('GET', '/category', ['name' => 'testcatChanged'])
         ->seeJson([
@@ -123,7 +139,11 @@ class CategoryTest extends TestCase
         $this->json('GET', '/category', ['name' => 'testcat']);
         $this->json('PUT', '/category', ['name' => 'testcatChanged'])
             ->seeJson([
-                'message' => 'Missing Category node id.'
+                'errors' => [
+                    [
+                        'message' => 'Missing Category node id.'
+                    ],
+                ]
             ]);
         $this->assertEquals(
             405,
@@ -132,7 +152,11 @@ class CategoryTest extends TestCase
 
         $this->json('GET', '/category', ['name' => 'testcatChanged'])
         ->seeJson([
-            'message' => 'Category "testcatChanged" not found.',
+            'errors' => [
+                [
+                    'message' => 'Category "testcatChanged" not found.',
+                ],
+            ]
         ]);
     }
 
@@ -142,7 +166,11 @@ class CategoryTest extends TestCase
         $this->json('GET', '/category', ['name' => 'testcat']);
         $this->json('PUT', '/category', ['id' => 999, 'name' => 'testcatChanged'])
             ->seeJson([
-                'message' => 'Category node with id "999" not found.'
+                'errors' => [
+                    [
+                        'message' => 'Category node with id "999" not found.'
+                    ],
+                ]
             ]);
         $this->assertEquals(
             404,
@@ -151,7 +179,11 @@ class CategoryTest extends TestCase
 
         $this->json('GET', '/category', ['name' => 'testcatChanged'])
         ->seeJson([
-            'message' => 'Category "testcatChanged" not found.',
+            'errors' => [
+                [
+                    'message' => 'Category "testcatChanged" not found.',
+                ],
+            ]
         ]);
     }
 
@@ -171,7 +203,11 @@ class CategoryTest extends TestCase
 
         $this->json('GET', '/category', ['name' => 'testcat'])
         ->seeJson([
-            'message' => 'Category "testcat" not found.',
+            'errors' => [
+                [
+                    'message' => 'Category "testcat" not found.',
+                ],
+            ]
         ]);
     }
 
@@ -179,7 +215,11 @@ class CategoryTest extends TestCase
     {
         $this->json('DELETE', '/category', ['id' => 999])
         ->seeJson([
-            'message' => 'Category node with id "999" not found.'
+            'errors' => [
+                [
+                    'message' => 'Category node with id "999" not found.'
+                ],
+            ]
         ]);
         $this->assertEquals(
             404,
@@ -191,7 +231,11 @@ class CategoryTest extends TestCase
     {
         $this->json('DELETE', '/category', ['name' => 'testcat'])
         ->seeJson([
-            'message' => 'Missing Category node id.'
+            'errors' => [
+                [
+                    'message' => 'Missing Category node id.'
+                ],
+            ]
         ]);
         $this->assertEquals(
             405,
@@ -216,7 +260,11 @@ class CategoryTest extends TestCase
 
         $this->json('GET', '/category', ['name' => 'testcat'])
         ->seeJson([
-            'message' => 'Category "testcat" not found.',
+            'errors' => [
+                [
+                    'message' => 'Category "testcat" not found.',
+                ],
+            ]
         ]);
     }
 }
