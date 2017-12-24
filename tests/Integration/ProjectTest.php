@@ -42,7 +42,11 @@ class ProjectTest extends TestCase
     {
         $this->json('POST', '/project', ['nameeee' => 'project1'])
             ->seeJson([
-                'message' => 'No Project name defined.',
+                'errors' => [
+                    [
+                        'message' => 'No Project name defined.',
+                    ]
+                ]
             ]);
 
         $this->assertEquals(
@@ -61,7 +65,11 @@ class ProjectTest extends TestCase
         $this->json('POST', '/project', ['name' => 'project1']);
         $this->json('POST', '/project', ['name' => 'project1'])
             ->seeJson([
-                'message' => 'Project with name "project1" already exists.',
+                'errors' => [
+                    [
+                        'message' => 'Project with name "project1" already exists.',
+                    ]
+                ]
             ]);
 
         $this->assertEquals(
@@ -88,7 +96,11 @@ class ProjectTest extends TestCase
     {
         $this->json('GET', '/project', ['name' => 'noproject'])
                 ->seeJson([
-                    'message' => 'Project "noproject" not found.',
+                    'errors' => [
+                        [
+                            'message' => 'Project "noproject" not found.',
+                        ]
+                    ]
                 ]);
         $this->assertEquals(
             404,
@@ -109,7 +121,11 @@ class ProjectTest extends TestCase
 
         $this->json('GET', '/project', ['name' => 'project1'])
         ->seeJson([
-            'message' => 'Project "project1" not found.',
+            'errors' => [
+                [
+                    'message' => 'Project "project1" not found.',
+                ]
+            ]
         ]);
         $this->json('GET', '/project', ['name' => 'project1Changed'])
         ->seeJson([
@@ -123,7 +139,11 @@ class ProjectTest extends TestCase
         $this->json('GET', '/project', ['name' => 'project1']);
         $this->json('PUT', '/project', ['name' => 'project1Changed'])
             ->seeJson([
-                'message' => 'Missing Project node id.'
+                'errors' => [
+                    [
+                        'message' => 'Missing Project node id.'
+                    ]
+                ]
             ]);
         $this->assertEquals(
             405,
@@ -132,7 +152,11 @@ class ProjectTest extends TestCase
 
         $this->json('GET', '/project', ['name' => 'project1Changed'])
         ->seeJson([
-            'message' => 'Project "project1Changed" not found.',
+            'errors' => [
+                [
+                    'message' => 'Project "project1Changed" not found.',
+                ]
+            ]
         ]);
     }
 
@@ -142,7 +166,11 @@ class ProjectTest extends TestCase
         $this->json('GET', '/project', ['name' => 'project1']);
         $this->json('PUT', '/project', ['id' => 999, 'name' => 'project1Changed'])
             ->seeJson([
-                'message' => 'Project node with id "999" not found.'
+                'errors' => [
+                    [
+                        'message' => 'Project node with id "999" not found.'
+                    ]
+                ]
             ]);
         $this->assertEquals(
             404,
@@ -151,7 +179,11 @@ class ProjectTest extends TestCase
 
         $this->json('GET', '/project', ['name' => 'project1Changed'])
         ->seeJson([
-            'message' => 'Project "project1Changed" not found.',
+            'errors' => [
+                [
+                    'message' => 'Project "project1Changed" not found.',
+                ]
+            ]
         ]);
     }
 
@@ -171,7 +203,11 @@ class ProjectTest extends TestCase
 
         $this->json('GET', '/project', ['name' => 'project1'])
         ->seeJson([
-            'message' => 'Project "project1" not found.',
+            'errors' => [
+                [
+                    'message' => 'Project "project1" not found.',
+                ]
+            ]
         ]);
     }
 
@@ -179,7 +215,11 @@ class ProjectTest extends TestCase
     {
         $this->json('DELETE', '/project', ['id' => 999])
         ->seeJson([
-            'message' => 'Project node with id "999" not found.'
+            'errors' => [
+                [
+                    'message' => 'Project node with id "999" not found.'
+                ]
+            ]
         ]);
         $this->assertEquals(
             404,
@@ -191,7 +231,11 @@ class ProjectTest extends TestCase
     {
         $this->json('DELETE', '/project', ['name' => 'project1'])
         ->seeJson([
-            'message' => 'Missing Project node id.'
+            'errors' => [
+                [
+                    'message' => 'Missing Project node id.'
+                ]
+            ]
         ]);
         $this->assertEquals(
             405,
@@ -207,7 +251,11 @@ class ProjectTest extends TestCase
     public function testCreateWithNotExistingCategory()
     {
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']])->seeJson([
-            'message' => 'Category "testcat" does not exist.'
+            'errors' => [
+                [
+                    'message' => 'Category "testcat" does not exist.'
+                ]
+            ]
         ]);
         $this->assertEquals(
             405,
@@ -271,7 +319,11 @@ class ProjectTest extends TestCase
 
         $this->json('GET', '/project', ['name' => 'project1'])
         ->seeJson([
-            'message' => 'Project "project1" not found.',
+            'errors' => [
+                [
+                    'message' => 'Project "project1" not found.',
+                ]
+            ]
         ]);
     }
 
@@ -311,7 +363,11 @@ class ProjectTest extends TestCase
             'categories' => ['testcat1', 'testcatFail'],
         ])
         ->seeJson([
-            'message' => 'Category "testcatFail" not found.',
+            'errors' => [
+                [
+                    'message' => 'Category "testcatFail" not found.',
+                ]
+            ]
         ]);
         $this->assertEquals(
             404,

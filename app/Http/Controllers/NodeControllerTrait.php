@@ -12,6 +12,8 @@ use Illuminate\Http\JsonResponse;
  */
 trait NodeControllerTrait
 {
+    use JsonResponseTrait;
+
     /**
      * @return JsonResponse
      */
@@ -49,10 +51,12 @@ trait NodeControllerTrait
                 return null;
             }
 
-            return response()->json(['message' => $label.' with name "'.$name.'" already exists.'], 409);
+            $this->addError($label.' with name "'.$name.'" already exists.');
+            return $this->generateJsonResponse(409);
         }
 
-        return response()->json(['message' => 'No '.$label.' name defined.'], 405);
+        $this->addError('No '.$label.' name defined.');
+        return $this->generateJsonResponse(405);
     }
 
     /**
@@ -66,7 +70,8 @@ trait NodeControllerTrait
         $node = $nodesRepository->findOneBy(['name' => $name]);
 
         if ($node === null) {
-            return response()->json(['message' => $label.' "'.$name.'" not found.'], 404);
+            $this->addError($label.' "'.$name.'" not found.');
+            return $this->generateJsonResponse(404);
         }
 
         return response()->json(['name' => $node->getName(), 'id' => $node->getId()]);
@@ -103,13 +108,15 @@ trait NodeControllerTrait
     public function verifyNodeById(string $label, Request $request): ?JsonResponse
     {
         if (!$request->has('id')) {
-            return response()->json(['message' => 'Missing '.$label.' node id.'], 405);
+            $this->addError('Missing '.$label.' node id.');
+            return $this->generateJsonResponse(405);
         }
 
         $nodeId = $request->get('id');
 
         if (!$this->nodeWithIdExists($label, $nodeId)) {
-            return response()->json(['message' => $label.' node with id "'.$nodeId.'" not found.'], 404);
+            $this->addError($label.' node with id "'.$nodeId.'" not found.');
+            return $this->generateJsonResponse(404);
         }
 
         return null;
