@@ -26,7 +26,7 @@ class ProjectTest extends TestCase
     public function testValidPost()
     {
         $this->json('POST', '/project', ['name' => 'project1']);
-
+        $this->assertArrayHasKey('id', $this->response->getData(true));
         $this->assertEquals(
             200,
             $this->response->getStatusCode()

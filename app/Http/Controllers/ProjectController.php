@@ -43,7 +43,7 @@ class ProjectController extends Controller
         $entityManager->persist($project);
         $entityManager->flush();
 
-        $this->addError($project->getId());
+        $this->addToPayload($project->getId(), 'id');
         return $this->generateJsonResponse(200);
     }
 

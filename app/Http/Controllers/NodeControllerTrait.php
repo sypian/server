@@ -33,7 +33,8 @@ trait NodeControllerTrait
         $entityManager->persist($node);
         $entityManager->flush();
 
-        return response()->json(['message' => $node->getId()], 200);
+        $this->addToPayload($node->getId(), 'id');
+        return $this->generateJsonResponse(200);
     }
 
     /**

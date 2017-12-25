@@ -26,7 +26,7 @@ class CategoryTest extends TestCase
     public function testValidPost()
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
-
+        $this->assertArrayHasKey('id', $this->response->getData(true));
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
