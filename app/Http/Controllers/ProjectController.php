@@ -35,7 +35,7 @@ class ProjectController extends Controller
                     $project->belongsTo($category);
                 } else {
                     $this->addError('Category "'.$categoryName.'" does not exist.');
-                    return $this->generateJsonResponse(405);
+                    return $this->generateJsonResponse(400);
                 }
             }
         }
@@ -44,7 +44,7 @@ class ProjectController extends Controller
         $entityManager->flush();
 
         $this->addError($project->getId());
-        return $this->generateJsonResponse(201);
+        return $this->generateJsonResponse(200);
     }
 
     /**
