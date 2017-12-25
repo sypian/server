@@ -33,7 +33,7 @@ trait NodeControllerTrait
         $entityManager->persist($node);
         $entityManager->flush();
 
-        return response()->json(['message' => $node->getId()], 201);
+        return response()->json(['message' => $node->getId()], 200);
     }
 
     /**
@@ -52,11 +52,11 @@ trait NodeControllerTrait
             }
 
             $this->addError($label.' with name "'.$name.'" already exists.');
-            return $this->generateJsonResponse(409);
+            return $this->generateJsonResponse(400);
         }
 
         $this->addError('No '.$label.' name defined.');
-        return $this->generateJsonResponse(405);
+        return $this->generateJsonResponse(400);
     }
 
     /**
@@ -109,7 +109,7 @@ trait NodeControllerTrait
     {
         if (!$request->has('id')) {
             $this->addError('Missing '.$label.' node id.');
-            return $this->generateJsonResponse(405);
+            return $this->generateJsonResponse(400);
         }
 
         $nodeId = $request->get('id');

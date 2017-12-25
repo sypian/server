@@ -19,7 +19,7 @@ class ProjectTest extends TestCase
     }
 
     /**
-     * Returns a 201 for a correct post call.
+     * Returns a 200 for a correct post call.
      *
      * @return void
      */
@@ -28,13 +28,13 @@ class ProjectTest extends TestCase
         $this->json('POST', '/project', ['name' => 'project1']);
 
         $this->assertEquals(
-            201,
+            200,
             $this->response->getStatusCode()
         );
     }
 
     /**
-     * Returns a 405 if we dont pass a name.
+     * Returns a 400 if we dont pass a name.
      *
      * @return void
      */
@@ -50,13 +50,13 @@ class ProjectTest extends TestCase
             ]);
 
         $this->assertEquals(
-            405,
+            400,
             $this->response->getStatusCode()
         );
     }
 
     /**
-     * Returns a 409 if the project to create already exists.
+     * Returns a 400 if the project to create already exists.
      *
      * @return void
      */
@@ -73,7 +73,7 @@ class ProjectTest extends TestCase
             ]);
 
         $this->assertEquals(
-            409,
+            400,
             $this->response->getStatusCode()
         );
     }
@@ -146,7 +146,7 @@ class ProjectTest extends TestCase
                 ]
             ]);
         $this->assertEquals(
-            405,
+            400,
             $this->response->getStatusCode()
         );
 
@@ -238,13 +238,13 @@ class ProjectTest extends TestCase
             ]
         ]);
         $this->assertEquals(
-            405,
+            400,
             $this->response->getStatusCode()
         );
     }
 
     /**
-     * Returns a 405 for trying to create a project with a non existing category.
+     * Returns a 400 for trying to create a project with a non existing category.
      *
      * @return void
      */
@@ -258,13 +258,13 @@ class ProjectTest extends TestCase
             ]
         ]);
         $this->assertEquals(
-            405,
+            400,
             $this->response->getStatusCode()
         );
     }
 
     /**
-     * Returns a 201 for trying to create a project with an existing category.
+     * Returns a 200 for trying to create a project with an existing category.
      *
      * @return void
      */
@@ -273,7 +273,7 @@ class ProjectTest extends TestCase
         $this->json('POST', '/category', ['name' => 'testcat']);
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']]);
         $this->assertEquals(
-            201,
+            200,
             $this->response->getStatusCode()
         );
     }
