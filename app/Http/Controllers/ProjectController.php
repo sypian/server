@@ -43,49 +43,55 @@ class ProjectController extends Controller
         $entityManager->persist($project);
         $entityManager->flush();
 
-        $this->addError($project->getId());
+        $this->addToPayload($project->getId(), 'id');
         return $this->generateJsonResponse(200);
     }
 
     /**
      * @return JsonResponse
      */
-    public function getProject(Request $request): JsonResponse
+    public function getProject(Request $request, int $nodeId): JsonResponse
     {
-        $name = $request->get('name');
-
-        if (!$this->nodeWithNameExists('Project', $name)) {
-            $this->addError('Project "'.$name.'" not found.');
-            return $this->generateJsonResponse(404);
-        }
-
-        $entityManager = app()->make('Neo4j\EntityManager');
-        $nodesRepository = $entityManager->getRepository(Project::class);
-        $node = $nodesRepository->findOneBy(['name' => $name]);
-        $categories = [];
-
-        foreach ($node->getCategories() as $projectCategory) {
-            $categories[] = $projectCategory->getCategory()->getName();
-        }
-
-        return response()->json(['name' => $node->getName(), 'id' => $node->getId(), 'categories' => $categories]);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    public function updateProject(Request $request): JsonResponse
-    {
-        $response = $this->verifyNodeById('Project', $request);
+        $response = $this->verifyNodeById('Project', $nodeId);
 
         if ($response !== null) {
             return $response;
         }
 
-        $nodeId = $request->get('id');
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository(Project::class);
-        $project = $nodesRepository->findOneById($nodeId);
+        $node = $nodesRepository->find($nodeId);
+        $categories = [];
+
+        foreach ($node->getCategories() as $projectCategory) {
+            $categories[] = [
+                'id' => $projectCategory->getCategory()->getId(),
+                'name' => $projectCategory->getCategory()->getName(),
+            ];
+        }
+
+        return response()->json(['id' => $nodeId, 'name' => $node->getName(), 'categories' => $categories]);
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function updateProject(Request $request, int $nodeId): JsonResponse
+    {
+        $response = $this->verifyNodeById('Project', $nodeId);
+
+        if ($response !== null) {
+            return $response;
+        }
+
+        if ($request->has('id') && $request->get('id') != $nodeId) {
+            $this->addError('Changing the Project id is not allowed.');
+            return $this->generateJsonResponse(400);
+        }
+
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $nodesRepository = $entityManager->getRepository(Project::class);
+        $project = $nodesRepository->find($nodeId);
 
         if ($request->has('categories')) {
             $categoryRepository = $entityManager->getRepository(Category::class);
@@ -114,28 +120,12 @@ class ProjectController extends Controller
     /**
      * @return JsonResponse
      */
-    public function deleteProject(Request $request): JsonResponse
+    public function deleteProject(Request $request, int $nodeId): JsonResponse
     {
-        $response = $this->verifyNodeById('Project', $request);
-
-        if ($response !== null) {
-            return $response;
-        }
-
-        $nodeId = $request->get('id');
-        $entityManager = app()->make('Neo4j\EntityManager');
-        $nodesRepository = $entityManager->getRepository(Project::class);
-        $project = $nodesRepository->findOneById($nodeId);
-
-        // Relations between the project and categories have to be removed first!
-        $this->removeProjectCategoryRelations($project);
-
-        $entityManager->remove($project);
-        $entityManager->flush();
-        return response()->json(['message' => 'Project node with id "'.$nodeId.'" got deleted.']);
+        return $this->deleteNode('Project', $request, $nodeId, [$this, 'removeProjectCategoryRelations']);
     }
 
-    public function removeProjectCategoryRelations($project)
+    public function removeProjectCategoryRelations(Project $project)
     {
         $entityManager = app()->make('Neo4j\EntityManager');
 
