@@ -82,6 +82,11 @@ class ProjectController extends Controller
             return $this->generateJsonResponse(404);
         }
 
+        if ($request->has('id') && $request->get('id') != $id) {
+            $this->addError('Changing the project id is not allowed.');
+            return $this->generateJsonResponse(400);
+        }
+
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository(Project::class);
         $project = $nodesRepository->find($id);

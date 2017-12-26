@@ -137,6 +137,20 @@ class ProjectTest extends TestCase
         );
     }
 
+    public function testUpdateChangeId()
+    {
+        $this->json('POST', '/project', ['name' => 'project1']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('PUT', '/project/'.$nodeId, ['id' => $nodeId+1, 'name' => 'project1'])
+        ->seeJson([
+            'message' => 'Changing the project id is not allowed.'
+        ]);
+        $this->assertEquals(
+            400,
+            $this->response->getStatusCode()
+        );
+    }
+
     public function testDeleteProject()
     {
         $this->json('POST', '/project', ['name' => 'project1']);
