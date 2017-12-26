@@ -80,23 +80,21 @@ trait NodeControllerTrait
     /**
      * @return JsonResponse
      */
-    public function updateNode(string $label, Request $request): JsonResponse
+    public function updateNode(string $label, Request $request, int $id): JsonResponse
     {
-        $response = $this->verifyNodeById($label, $request);
-
-        if ($response !== null) {
-            return $response;
+        if (!$this->nodeWithIdExists($label, $id)) {
+            $this->addError($label.' with id "'.$id.'" not found.');
+            return $this->generateJsonResponse(404);
         }
 
-        $nodeId = $request->get('id');
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
-        $node = $nodesRepository->findOneById($nodeId);
+        $node = $nodesRepository->find($id);
 
         $node->setName($request->get('name'));
         $entityManager->persist($node);
         $entityManager->flush();
-        return response()->json(['name' => $node->getName(), 'id' => $node->getId()]);
+        return response()->json(['name' => $node->getName(), 'id' => $id]);
     }
 
     /**

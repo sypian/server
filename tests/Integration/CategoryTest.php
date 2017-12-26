@@ -113,7 +113,7 @@ class CategoryTest extends TestCase
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/category', ['id' => $nodeId, 'name' => 'testcatChanged']);
+        $this->json('PUT', "/category/$nodeId", ['id' => $nodeId, 'name' => 'testcatChanged']);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
@@ -125,33 +125,13 @@ class CategoryTest extends TestCase
         ]);
     }
 
-    public function testUpdateWithoutId()
-    {
-        $this->json('POST', '/category', ['name' => 'testcat']);
-        $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/category', ['name' => 'testcatChanged'])
-            ->seeJson([
-                'errors' => [
-                    [
-                        'message' => 'Missing Category node id.'
-                    ],
-                ]
-            ]);
-        $this->assertEquals(
-            400,
-            $this->response->getStatusCode()
-        );
-    }
-
     public function testUpdateWithIdNotFound()
     {
-        $this->json('POST', '/category', ['name' => 'testcat']);
-        $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/category', ['id' => 999, 'name' => 'testcatChanged'])
+        $this->json('PUT', '/category/999', ['id' => 999, 'name' => 'testcatChanged'])
             ->seeJson([
                 'errors' => [
                     [
-                        'message' => 'Category node with id "999" not found.'
+                        'message' => 'Category with id "999" not found.'
                     ],
                 ]
             ]);
