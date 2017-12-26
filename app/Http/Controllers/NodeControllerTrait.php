@@ -87,6 +87,11 @@ trait NodeControllerTrait
             return $this->generateJsonResponse(404);
         }
 
+        if ($request->has('id') && $request->get('id') != $id) {
+            $this->addError("Changing the $label id is not allowed.");
+            return $this->generateJsonResponse(400);
+        }
+
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
         $node = $nodesRepository->find($id);

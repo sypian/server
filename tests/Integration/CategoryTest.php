@@ -95,7 +95,7 @@ class CategoryTest extends TestCase
 
     public function testCategoryNotFound()
     {
-        $this->json('GET', '/category/999', ['name' => 'nocategory'])
+        $this->json('GET', '/category/999')
                 ->seeJson([
                     'errors' => [
                         [
@@ -113,16 +113,34 @@ class CategoryTest extends TestCase
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', "/category/$nodeId", ['id' => $nodeId, 'name' => 'testcatChanged']);
+        $this->json('PUT', "/category/$nodeId", ['name' => 'testcatChanged']);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', "/category/$nodeId", ['name' => 'testcatChanged'])
+        $this->json('GET', "/category/$nodeId")
         ->seeJson([
             'name' => 'testcatChanged',
         ]);
+    }
+
+    public function testUpdateChangedId()
+    {
+        $this->json('POST', '/category', ['name' => 'testcat']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('PUT', "/category/$nodeId", ['id' => $nodeId+1, 'name' => 'testcatChanged'])
+            ->seeJson([
+                'errors' => [
+                    [
+                        'message' => 'Changing the Category id is not allowed.'
+                    ],
+                ]
+            ]);
+        $this->assertEquals(
+            400,
+            $this->response->getStatusCode()
+        );
     }
 
     public function testUpdateWithIdNotFound()

@@ -143,7 +143,7 @@ class ProjectTest extends TestCase
         $nodeId = $this->response->getData(true)['id'];
         $this->json('PUT', '/project/'.$nodeId, ['id' => $nodeId+1, 'name' => 'project1'])
         ->seeJson([
-            'message' => 'Changing the project id is not allowed.'
+            'message' => 'Changing the Project id is not allowed.'
         ]);
         $this->assertEquals(
             400,

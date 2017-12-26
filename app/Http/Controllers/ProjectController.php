@@ -83,7 +83,7 @@ class ProjectController extends Controller
         }
 
         if ($request->has('id') && $request->get('id') != $id) {
-            $this->addError('Changing the project id is not allowed.');
+            $this->addError('Changing the Project id is not allowed.');
             return $this->generateJsonResponse(400);
         }
 
