@@ -145,7 +145,7 @@ class CategoryTest extends TestCase
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('DELETE', '/category', ['id' => $nodeId])
+        $this->json('DELETE', "/category/$nodeId")
         ->seeJson([
             'message' => 'Category node with id "'.$nodeId.'" got deleted.'
         ]);
@@ -166,11 +166,11 @@ class CategoryTest extends TestCase
 
     public function testDeleteNotExistingCategory()
     {
-        $this->json('DELETE', '/category', ['id' => 999])
+        $this->json('DELETE', '/category/999')
         ->seeJson([
             'errors' => [
                 [
-                    'message' => 'Category node with id "999" not found.'
+                    'message' => 'Category with id "999" not found.'
                 ],
             ]
         ]);
@@ -180,28 +180,12 @@ class CategoryTest extends TestCase
         );
     }
 
-    public function testDeleteCategoryWithoutId()
-    {
-        $this->json('DELETE', '/category', ['name' => 'testcat'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Missing Category node id.'
-                ],
-            ]
-        ]);
-        $this->assertEquals(
-            400,
-            $this->response->getStatusCode()
-        );
-    }
-
     public function testDeleteCategoryWithConfiguredProject()
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
         $nodeId = $this->response->getData(true)['id'];
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']]);
-        $this->json('DELETE', '/category', ['id' => $nodeId])
+        $this->json('DELETE', "/category/$nodeId")
         ->seeJson([
             'message' => 'Category node with id "'.$nodeId.'" got deleted.'
         ]);

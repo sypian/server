@@ -24,7 +24,7 @@ $router->get('/category/{id:[0-9]+}', [
 $router->put('/category/{id:[0-9]+}', [
     'as' => 'category', 'uses' => 'CategoryController@updateCategory'
 ]);
-$router->delete('/category', [
+$router->delete('/category/{id:[0-9]+}', [
     'as' => 'category', 'uses' => 'CategoryController@deleteCategory'
 ]);
 
