@@ -50,7 +50,7 @@ class ProjectController extends Controller
     /**
      * @return JsonResponse
      */
-    public function getProject(Request $request, $id): JsonResponse
+    public function getProject(Request $request, int $id): JsonResponse
     {
         if (!$this->nodeWithIdExists('Project', $id)) {
             $this->addError('Project with id "'.$id.'" not found.');
@@ -75,18 +75,16 @@ class ProjectController extends Controller
     /**
      * @return JsonResponse
      */
-    public function updateProject(Request $request): JsonResponse
+    public function updateProject(Request $request, int $id): JsonResponse
     {
-        $response = $this->verifyNodeById('Project', $request);
-
-        if ($response !== null) {
-            return $response;
+        if (!$this->nodeWithIdExists('Project', $id)) {
+            $this->addError('Project with id "'.$id.'" not found.');
+            return $this->generateJsonResponse(404);
         }
 
-        $nodeId = $request->get('id');
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository(Project::class);
-        $project = $nodesRepository->findOneById($nodeId);
+        $project = $nodesRepository->find($id);
 
         if ($request->has('categories')) {
             $categoryRepository = $entityManager->getRepository(Category::class);

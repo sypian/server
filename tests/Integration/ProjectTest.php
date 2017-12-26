@@ -114,7 +114,7 @@ class ProjectTest extends TestCase
     {
         $this->json('POST', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/project', ['id' => $nodeId, 'name' => 'project1Changed']);
+        $this->json('PUT', "/project/$nodeId", ['id' => $nodeId, 'name' => 'project1Changed']);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
@@ -126,37 +126,11 @@ class ProjectTest extends TestCase
         ]);
     }
 
-    public function testUpdateWithoutId()
-    {
-        $this->json('POST', '/project', ['name' => 'project1']);
-        $nodeId = $this->response->getData(true)['id'];
-        $this->json('GET', "/project/$nodeId");
-        $this->json('PUT', '/project', ['name' => 'project1Changed'])
-            ->seeJson([
-                'errors' => [
-                    [
-                        'message' => 'Missing Project node id.'
-                    ]
-                ]
-            ]);
-        $this->assertEquals(
-            400,
-            $this->response->getStatusCode()
-        );
-    }
-
     public function testUpdateWithIdNotFound()
     {
         $this->json('POST', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/project', ['id' => $nodeId+1, 'name' => 'project1Changed'])
-            ->seeJson([
-                'errors' => [
-                    [
-                        'message' => 'Project node with id "'.($nodeId+1).'" not found.'
-                    ]
-                ]
-            ]);
+        $this->json('PUT', '/project/'.($nodeId+1), ['id' => $nodeId+1, 'name' => 'project1Changed']);
         $this->assertEquals(
             404,
             $this->response->getStatusCode()
@@ -314,7 +288,7 @@ class ProjectTest extends TestCase
         $catId2 = $this->response->getData(true)['id'];
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1']]);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/project', [
+        $this->json('PUT', "/project/$nodeId", [
             'id' => $nodeId,
             'name' => 'project1',
             'categories' => ['testcat1', 'testcat2'],
@@ -346,7 +320,7 @@ class ProjectTest extends TestCase
         $catId1 = $this->response->getData(true)['id'];
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1']]);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/project', [
+        $this->json('PUT', "/project/$nodeId", [
             'id' => $nodeId,
             'name' => 'project1',
             'categories' => ['testcat1', 'testcatFail'],
@@ -382,7 +356,7 @@ class ProjectTest extends TestCase
         $catId2 = $this->response->getData(true)['id'];
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/project', ['id' => $nodeId, 'name' => 'project1', 'categories' => ['testcat2']]);
+        $this->json('PUT', "/project/$nodeId", ['id' => $nodeId, 'name' => 'project1', 'categories' => ['testcat2']]);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
