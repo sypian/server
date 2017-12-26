@@ -98,29 +98,6 @@ trait NodeControllerTrait
     }
 
     /**
-     * Verifies a node from a request using a given id and returns a failure response or null
-     * if the request is ok.
-     *
-     * @return null|JsonResponse
-     */
-    public function verifyNodeById(string $label, Request $request): ?JsonResponse
-    {
-        if (!$request->has('id')) {
-            $this->addError('Missing '.$label.' node id.');
-            return $this->generateJsonResponse(400);
-        }
-
-        $nodeId = $request->get('id');
-
-        if (!$this->nodeWithIdExists($label, $nodeId)) {
-            $this->addError($label.' node with id "'.$nodeId.'" not found.');
-            return $this->generateJsonResponse(404);
-        }
-
-        return null;
-    }
-
-    /**
      * Returns whether a node with the given node id exists in the database.
      *
      * @return bool
