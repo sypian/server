@@ -52,9 +52,10 @@ class ProjectController extends Controller
      */
     public function getProject(Request $request, int $nodeId): JsonResponse
     {
-        if (!$this->nodeWithIdExists('Project', $nodeId)) {
-            $this->addError('Project with id "'.$nodeId.'" not found.');
-            return $this->generateJsonResponse(404);
+        $response = $this->verifyNodeById('Project', $nodeId);
+
+        if ($response !== null) {
+            return $response;
         }
 
         $entityManager = app()->make('Neo4j\EntityManager');
@@ -77,9 +78,10 @@ class ProjectController extends Controller
      */
     public function updateProject(Request $request, int $nodeId): JsonResponse
     {
-        if (!$this->nodeWithIdExists('Project', $nodeId)) {
-            $this->addError('Project with id "'.$nodeId.'" not found.');
-            return $this->generateJsonResponse(404);
+        $response = $this->verifyNodeById('Project', $nodeId);
+
+        if ($response !== null) {
+            return $response;
         }
 
         if ($request->has('id') && $request->get('id') != $nodeId) {
@@ -120,9 +122,10 @@ class ProjectController extends Controller
      */
     public function deleteProject(Request $request, int $nodeId): JsonResponse
     {
-        if (!$this->nodeWithIdExists('Project', $nodeId)) {
-            $this->addError('Project with id "'.$nodeId.'" not found.');
-            return $this->generateJsonResponse(404);
+        $response = $this->verifyNodeById('Project', $nodeId);
+
+        if ($response !== null) {
+            return $response;
         }
 
         $entityManager = app()->make('Neo4j\EntityManager');

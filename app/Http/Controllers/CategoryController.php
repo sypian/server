@@ -39,9 +39,10 @@ class CategoryController extends Controller
      */
     public function deleteCategory(Request $request, int $nodeId): JsonResponse
     {
-        if (!$this->nodeWithIdExists('Category', $nodeId)) {
-            $this->addError('Category with id "'.$nodeId.'" not found.');
-            return $this->generateJsonResponse(404);
+        $response = $this->verifyNodeById('Category', $nodeId);
+
+        if ($response !== null) {
+            return $response;
         }
 
         $entityManager = app()->make('Neo4j\EntityManager');

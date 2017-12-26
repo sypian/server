@@ -61,18 +61,34 @@ trait NodeControllerTrait
     }
 
     /**
+     * Verifies a node by a node id and returns a failure response on failure or null if the id exists.
+     *
+     * @return null|JsonResponse
+     */
+    public function verifyNodeById(string $label, int $nodeId): ?JsonResponse
+    {
+        if (!$this->nodeWithIdExists($label, $nodeId)) {
+            $this->addError($label.' with id "'.$nodeId.'" not found.');
+            return $this->generateJsonResponse(404);
+        }
+
+        return null;
+    }
+
+    /**
      * @return JsonResponse
      */
     public function getNode(string $label, Request $request, int $nodeId): JsonResponse
     {
+        $response = $this->verifyNodeById($label, $nodeId);
+
+        if ($response !== null) {
+            return $response;
+        }
+
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
         $node = $nodesRepository->find($nodeId);
-
-        if ($node === null) {
-            $this->addError($label.' with id "'.$nodeId.'" not found.');
-            return $this->generateJsonResponse(404);
-        }
 
         return response()->json(['name' => $node->getName(), 'id' => $node->getId()]);
     }
@@ -82,9 +98,10 @@ trait NodeControllerTrait
      */
     public function updateNode(string $label, Request $request, int $nodeId): JsonResponse
     {
-        if (!$this->nodeWithIdExists($label, $nodeId)) {
-            $this->addError($label.' with id "'.$nodeId.'" not found.');
-            return $this->generateJsonResponse(404);
+        $response = $this->verifyNodeById($label, $nodeId);
+
+        if ($response !== null) {
+            return $response;
         }
 
         if ($request->has('id') && $request->get('id') != $nodeId) {
