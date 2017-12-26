@@ -31,7 +31,7 @@ $router->delete('/category', [
 $router->post('/project', [
     'as' => 'project', 'uses' => 'ProjectController@createProject'
 ]);
-$router->get('/project', [
+$router->get('project/{id:[0-9]+}', [
     'as' => 'project', 'uses' => 'ProjectController@getProject'
 ]);
 $router->put('/project', [

@@ -81,11 +81,13 @@ class ProjectTest extends TestCase
     public function testValidGetRequest()
     {
         $this->json('POST', '/project', ['name' => 'project1']);
-        $this->json('GET', '/project', ['name' => 'project1'])
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('GET', "/project/$nodeId")
              ->seeJson([
                  'name' => 'project1',
+                 'categories' => [],
              ]);
-        $this->assertArrayHasKey('id', $this->response->getData(true));
+        $this->assertEquals($nodeId, $this->response->getData(true)['id']);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
@@ -94,11 +96,11 @@ class ProjectTest extends TestCase
 
     public function testProjectNotFound()
     {
-        $this->json('GET', '/project', ['name' => 'noproject'])
+        $this->json('GET', '/project/999')
                 ->seeJson([
                     'errors' => [
                         [
-                            'message' => 'Project "noproject" not found.',
+                            'message' => 'Project with id "999" not found.',
                         ]
                     ]
                 ]);
@@ -111,7 +113,6 @@ class ProjectTest extends TestCase
     public function testValidUpdate()
     {
         $this->json('POST', '/project', ['name' => 'project1']);
-        $this->json('GET', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
         $this->json('PUT', '/project', ['id' => $nodeId, 'name' => 'project1Changed']);
         $this->assertEquals(
@@ -119,15 +120,7 @@ class ProjectTest extends TestCase
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', '/project', ['name' => 'project1'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Project "project1" not found.',
-                ]
-            ]
-        ]);
-        $this->json('GET', '/project', ['name' => 'project1Changed'])
+        $this->json('GET', "/project/$nodeId", ['name' => 'project1Changed'])
         ->seeJson([
             'name' => 'project1Changed',
         ]);
@@ -136,7 +129,8 @@ class ProjectTest extends TestCase
     public function testUpdateWithoutId()
     {
         $this->json('POST', '/project', ['name' => 'project1']);
-        $this->json('GET', '/project', ['name' => 'project1']);
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('GET', "/project/$nodeId");
         $this->json('PUT', '/project', ['name' => 'project1Changed'])
             ->seeJson([
                 'errors' => [
@@ -149,26 +143,17 @@ class ProjectTest extends TestCase
             400,
             $this->response->getStatusCode()
         );
-
-        $this->json('GET', '/project', ['name' => 'project1Changed'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Project "project1Changed" not found.',
-                ]
-            ]
-        ]);
     }
 
     public function testUpdateWithIdNotFound()
     {
         $this->json('POST', '/project', ['name' => 'project1']);
-        $this->json('GET', '/project', ['name' => 'project1']);
-        $this->json('PUT', '/project', ['id' => 999, 'name' => 'project1Changed'])
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('PUT', '/project', ['id' => $nodeId+1, 'name' => 'project1Changed'])
             ->seeJson([
                 'errors' => [
                     [
-                        'message' => 'Project node with id "999" not found.'
+                        'message' => 'Project node with id "'.($nodeId+1).'" not found.'
                     ]
                 ]
             ]);
@@ -176,21 +161,11 @@ class ProjectTest extends TestCase
             404,
             $this->response->getStatusCode()
         );
-
-        $this->json('GET', '/project', ['name' => 'project1Changed'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Project "project1Changed" not found.',
-                ]
-            ]
-        ]);
     }
 
     public function testDeleteProject()
     {
         $this->json('POST', '/project', ['name' => 'project1']);
-        $this->json('GET', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
         $this->json('DELETE', '/project', ['id' => $nodeId])
         ->seeJson([
@@ -201,14 +176,11 @@ class ProjectTest extends TestCase
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', '/project', ['name' => 'project1'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Project "project1" not found.',
-                ]
-            ]
-        ]);
+        $this->json('GET', "/project/$nodeId");
+        $this->assertEquals(
+            404,
+            $this->response->getStatusCode()
+        );
     }
 
     public function testDeleteNotExistingProject()
@@ -286,13 +258,24 @@ class ProjectTest extends TestCase
     public function testGetProjectWithCategories()
     {
         $this->json('POST', '/category', ['name' => 'testcat1']);
+        $catId1 = $this->response->getData(true)['id'];
         $this->json('POST', '/category', ['name' => 'testcat2']);
+        $catId2 = $this->response->getData(true)['id'];
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
-
-        $this->json('GET', '/project', ['name' => 'project1'])
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('GET', "/project/$nodeId")
              ->seeJson([
                  'name' => 'project1',
-                 'categories' => ['testcat1', 'testcat2']
+                 'categories' => [
+                     [
+                         'id' => $catId1,
+                         'name' => 'testcat1',
+                     ],
+                     [
+                         'id' => $catId2,
+                         'name' => 'testcat2',
+                     ],
+                 ]
              ]);
         $this->assertArrayHasKey('id', $this->response->getData(true));
         $this->assertEquals(
@@ -306,7 +289,6 @@ class ProjectTest extends TestCase
         $this->json('POST', '/category', ['name' => 'testcat1']);
         $this->json('POST', '/category', ['name' => 'testcat2']);
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
-        $this->json('GET', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
         $this->json('DELETE', '/project', ['id' => $nodeId])
         ->seeJson([
@@ -317,22 +299,20 @@ class ProjectTest extends TestCase
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', '/project', ['name' => 'project1'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Project "project1" not found.',
-                ]
-            ]
-        ]);
+        $this->json('GET', "/project/$nodeId");
+        $this->assertEquals(
+            404,
+            $this->response->getStatusCode()
+        );
     }
 
     public function testUpdateAddCategory()
     {
         $this->json('POST', '/category', ['name' => 'testcat1']);
+        $catId1 = $this->response->getData(true)['id'];
         $this->json('POST', '/category', ['name' => 'testcat2']);
+        $catId2 = $this->response->getData(true)['id'];
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1']]);
-        $this->json('GET', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
         $this->json('PUT', '/project', [
             'id' => $nodeId,
@@ -344,18 +324,27 @@ class ProjectTest extends TestCase
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', '/project', ['name' => 'project1'])
+        $this->json('GET', "/project/$nodeId")
         ->seeJson([
             'name' => 'project1',
-            'categories' => ['testcat1', 'testcat2'],
+            'categories' => [
+                [
+                    'id' => $catId1,
+                    'name' => 'testcat1',
+                ],
+                [
+                    'id' => $catId2,
+                    'name' => 'testcat2',
+                ],
+            ]
         ]);
     }
 
     public function testUpdateAddNotExistingCategory()
     {
         $this->json('POST', '/category', ['name' => 'testcat1']);
+        $catId1 = $this->response->getData(true)['id'];
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1']]);
-        $this->json('GET', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
         $this->json('PUT', '/project', [
             'id' => $nodeId,
@@ -374,19 +363,25 @@ class ProjectTest extends TestCase
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', '/project', ['name' => 'project1'])
+        $this->json('GET', "/project/$nodeId")
         ->seeJson([
             'name' => 'project1',
-            'categories' => ['testcat1'],
+            'categories' => [
+                [
+                    'id' => $catId1,
+                    'name' => 'testcat1',
+                ],
+            ]
         ]);
     }
 
     public function testUpdateRemoveCategory()
     {
         $this->json('POST', '/category', ['name' => 'testcat1']);
+        $catId1 = $this->response->getData(true)['id'];
         $this->json('POST', '/category', ['name' => 'testcat2']);
+        $catId2 = $this->response->getData(true)['id'];
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
-        $this->json('GET', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
         $this->json('PUT', '/project', ['id' => $nodeId, 'name' => 'project1', 'categories' => ['testcat2']]);
         $this->assertEquals(
@@ -394,10 +389,15 @@ class ProjectTest extends TestCase
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', '/project', ['name' => 'project1'])
+        $this->json('GET', "/project/$nodeId")
         ->seeJson([
             'name' => 'project1',
-            'categories' => ['testcat2'],
+            'categories' => [
+                [
+                    'id' => $catId2,
+                    'name' => 'testcat2',
+                ],
+            ]
         ]);
     }
 }
