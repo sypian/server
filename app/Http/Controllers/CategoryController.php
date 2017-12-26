@@ -54,7 +54,7 @@ class CategoryController extends Controller
 
         $entityManager->remove($category);
         $entityManager->flush();
-        return response()->json(['message' => 'Category node with id "'.$nodeId.'" got deleted.']);
+        return response()->json(['message' => 'Category with id "'.$nodeId.'" got deleted.']);
     }
 
     public function removeProjectCategoryRelations($category)

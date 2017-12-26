@@ -165,7 +165,7 @@ class CategoryTest extends TestCase
         $nodeId = $this->response->getData(true)['id'];
         $this->json('DELETE', "/category/$nodeId")
         ->seeJson([
-            'message' => 'Category node with id "'.$nodeId.'" got deleted.'
+            'message' => 'Category with id "'.$nodeId.'" got deleted.'
         ]);
         $this->assertEquals(
             200,
@@ -205,7 +205,7 @@ class CategoryTest extends TestCase
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']]);
         $this->json('DELETE', "/category/$nodeId")
         ->seeJson([
-            'message' => 'Category node with id "'.$nodeId.'" got deleted.'
+            'message' => 'Category with id "'.$nodeId.'" got deleted.'
         ]);
         $this->assertEquals(
             200,
