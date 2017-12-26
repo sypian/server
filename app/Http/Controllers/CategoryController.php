@@ -21,39 +21,39 @@ class CategoryController extends Controller
     /**
      * @return JsonResponse
      */
-    public function getCategory(Request $request, int $id): JsonResponse
+    public function getCategory(Request $request, int $nodeId): JsonResponse
     {
-        return $this->getNode('Category', $request, $id);
+        return $this->getNode('Category', $request, $nodeId);
     }
 
     /**
      * @return JsonResponse
      */
-    public function updateCategory(Request $request, int $id): JsonResponse
+    public function updateCategory(Request $request, int $nodeId): JsonResponse
     {
-        return $this->updateNode('Category', $request, $id);
+        return $this->updateNode('Category', $request, $nodeId);
     }
 
     /**
      * @return JsonResponse
      */
-    public function deleteCategory(Request $request, int $id): JsonResponse
+    public function deleteCategory(Request $request, int $nodeId): JsonResponse
     {
-        if (!$this->nodeWithIdExists('Category', $id)) {
-            $this->addError('Category with id "'.$id.'" not found.');
+        if (!$this->nodeWithIdExists('Category', $nodeId)) {
+            $this->addError('Category with id "'.$nodeId.'" not found.');
             return $this->generateJsonResponse(404);
         }
 
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository(Category::class);
-        $category = $nodesRepository->find($id);
+        $category = $nodesRepository->find($nodeId);
 
         // Relations between the category and categories have to be removed first!
         $this->removeProjectCategoryRelations($category);
 
         $entityManager->remove($category);
         $entityManager->flush();
-        return response()->json(['message' => 'Category node with id "'.$id.'" got deleted.']);
+        return response()->json(['message' => 'Category node with id "'.$nodeId.'" got deleted.']);
     }
 
     public function removeProjectCategoryRelations($category)

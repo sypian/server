@@ -63,14 +63,14 @@ trait NodeControllerTrait
     /**
      * @return JsonResponse
      */
-    public function getNode(string $label, Request $request, int $id): JsonResponse
+    public function getNode(string $label, Request $request, int $nodeId): JsonResponse
     {
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
-        $node = $nodesRepository->find($id);
+        $node = $nodesRepository->find($nodeId);
 
         if ($node === null) {
-            $this->addError($label.' with id "'.$id.'" not found.');
+            $this->addError($label.' with id "'.$nodeId.'" not found.');
             return $this->generateJsonResponse(404);
         }
 
@@ -80,26 +80,26 @@ trait NodeControllerTrait
     /**
      * @return JsonResponse
      */
-    public function updateNode(string $label, Request $request, int $id): JsonResponse
+    public function updateNode(string $label, Request $request, int $nodeId): JsonResponse
     {
-        if (!$this->nodeWithIdExists($label, $id)) {
-            $this->addError($label.' with id "'.$id.'" not found.');
+        if (!$this->nodeWithIdExists($label, $nodeId)) {
+            $this->addError($label.' with id "'.$nodeId.'" not found.');
             return $this->generateJsonResponse(404);
         }
 
-        if ($request->has('id') && $request->get('id') != $id) {
+        if ($request->has('id') && $request->get('id') != $nodeId) {
             $this->addError("Changing the $label id is not allowed.");
             return $this->generateJsonResponse(400);
         }
 
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
-        $node = $nodesRepository->find($id);
+        $node = $nodesRepository->find($nodeId);
 
         $node->setName($request->get('name'));
         $entityManager->persist($node);
         $entityManager->flush();
-        return response()->json(['name' => $node->getName(), 'id' => $id]);
+        return response()->json(['name' => $node->getName(), 'id' => $nodeId]);
     }
 
     /**
