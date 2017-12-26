@@ -81,7 +81,8 @@ class CategoryTest extends TestCase
     public function testValidGetRequest()
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
-        $this->json('GET', '/category', ['name' => 'testcat'])
+        $nodeId = $this->response->getData(true)['id'];
+        $this->json('GET', "/category/$nodeId")
              ->seeJson([
                  'name' => 'testcat',
              ]);
@@ -94,11 +95,11 @@ class CategoryTest extends TestCase
 
     public function testCategoryNotFound()
     {
-        $this->json('GET', '/category', ['name' => 'nocategory'])
+        $this->json('GET', '/category/999', ['name' => 'nocategory'])
                 ->seeJson([
                     'errors' => [
                         [
-                            'message' => 'Category "nocategory" not found.',
+                            'message' => 'Category with id "999" not found.',
                         ],
                     ]
                 ]);
@@ -111,7 +112,6 @@ class CategoryTest extends TestCase
     public function testValidUpdate()
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
-        $this->json('GET', '/category', ['name' => 'testcat']);
         $nodeId = $this->response->getData(true)['id'];
         $this->json('PUT', '/category', ['id' => $nodeId, 'name' => 'testcatChanged']);
         $this->assertEquals(
@@ -119,15 +119,7 @@ class CategoryTest extends TestCase
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', '/category', ['name' => 'testcat'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Category "testcat" not found.',
-                ],
-            ]
-        ]);
-        $this->json('GET', '/category', ['name' => 'testcatChanged'])
+        $this->json('GET', "/category/$nodeId", ['name' => 'testcatChanged'])
         ->seeJson([
             'name' => 'testcatChanged',
         ]);
@@ -136,7 +128,7 @@ class CategoryTest extends TestCase
     public function testUpdateWithoutId()
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
-        $this->json('GET', '/category', ['name' => 'testcat']);
+        $nodeId = $this->response->getData(true)['id'];
         $this->json('PUT', '/category', ['name' => 'testcatChanged'])
             ->seeJson([
                 'errors' => [
@@ -149,21 +141,12 @@ class CategoryTest extends TestCase
             400,
             $this->response->getStatusCode()
         );
-
-        $this->json('GET', '/category', ['name' => 'testcatChanged'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Category "testcatChanged" not found.',
-                ],
-            ]
-        ]);
     }
 
     public function testUpdateWithIdNotFound()
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
-        $this->json('GET', '/category', ['name' => 'testcat']);
+        $nodeId = $this->response->getData(true)['id'];
         $this->json('PUT', '/category', ['id' => 999, 'name' => 'testcatChanged'])
             ->seeJson([
                 'errors' => [
@@ -176,21 +159,11 @@ class CategoryTest extends TestCase
             404,
             $this->response->getStatusCode()
         );
-
-        $this->json('GET', '/category', ['name' => 'testcatChanged'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Category "testcatChanged" not found.',
-                ],
-            ]
-        ]);
     }
 
     public function testDeleteCategory()
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
-        $this->json('GET', '/category', ['name' => 'testcat']);
         $nodeId = $this->response->getData(true)['id'];
         $this->json('DELETE', '/category', ['id' => $nodeId])
         ->seeJson([
@@ -201,11 +174,11 @@ class CategoryTest extends TestCase
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', '/category', ['name' => 'testcat'])
+        $this->json('GET', "/category/$nodeId")
         ->seeJson([
             'errors' => [
                 [
-                    'message' => 'Category "testcat" not found.',
+                    'message' => 'Category with id "'.$nodeId.'" not found.',
                 ],
             ]
         ]);
@@ -246,9 +219,8 @@ class CategoryTest extends TestCase
     public function testDeleteCategoryWithConfiguredProject()
     {
         $this->json('POST', '/category', ['name' => 'testcat']);
-        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']]);
-        $this->json('GET', '/category', ['name' => 'testcat']);
         $nodeId = $this->response->getData(true)['id'];
+        $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat']]);
         $this->json('DELETE', '/category', ['id' => $nodeId])
         ->seeJson([
             'message' => 'Category node with id "'.$nodeId.'" got deleted.'
@@ -258,11 +230,11 @@ class CategoryTest extends TestCase
             $this->response->getStatusCode()
         );
 
-        $this->json('GET', '/category', ['name' => 'testcat'])
+        $this->json('GET', "/category/$nodeId")
         ->seeJson([
             'errors' => [
                 [
-                    'message' => 'Category "testcat" not found.',
+                    'message' => 'Category with id "'.$nodeId.'" not found.',
                 ],
             ]
         ]);

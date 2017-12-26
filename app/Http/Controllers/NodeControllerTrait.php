@@ -63,15 +63,14 @@ trait NodeControllerTrait
     /**
      * @return JsonResponse
      */
-    public function getNode(string $label, Request $request): JsonResponse
+    public function getNode(string $label, Request $request, int $id): JsonResponse
     {
-        $name = $request->get('name');
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
-        $node = $nodesRepository->findOneBy(['name' => $name]);
+        $node = $nodesRepository->find($id);
 
         if ($node === null) {
-            $this->addError($label.' "'.$name.'" not found.');
+            $this->addError($label.' with id "'.$id.'" not found.');
             return $this->generateJsonResponse(404);
         }
 

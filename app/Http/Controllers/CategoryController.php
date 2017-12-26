@@ -21,9 +21,9 @@ class CategoryController extends Controller
     /**
      * @return JsonResponse
      */
-    public function getCategory(Request $request): JsonResponse
+    public function getCategory(Request $request, int $id): JsonResponse
     {
-        return $this->getNode('Category', $request);
+        return $this->getNode('Category', $request, $id);
     }
 
     /**

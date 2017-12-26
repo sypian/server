@@ -18,7 +18,7 @@ $router->get('/', function () use ($router) {
 $router->post('/category', [
     'as' => 'category', 'uses' => 'CategoryController@createCategory'
 ]);
-$router->get('/category', [
+$router->get('/category/{id:[0-9]+}', [
     'as' => 'category', 'uses' => 'CategoryController@getCategory'
 ]);
 $router->put('/category', [
