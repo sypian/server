@@ -114,7 +114,7 @@ class ProjectTest extends TestCase
     {
         $this->json('POST', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', "/project/$nodeId", ['id' => $nodeId, 'name' => 'project1Changed']);
+        $this->json('PUT', "/project/$nodeId", ['name' => 'project1Changed']);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
@@ -130,7 +130,7 @@ class ProjectTest extends TestCase
     {
         $this->json('POST', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('PUT', '/project/'.($nodeId+1), ['id' => $nodeId+1, 'name' => 'project1Changed']);
+        $this->json('PUT', '/project/'.($nodeId+1), ['name' => 'project1Changed']);
         $this->assertEquals(
             404,
             $this->response->getStatusCode()
@@ -141,9 +141,9 @@ class ProjectTest extends TestCase
     {
         $this->json('POST', '/project', ['name' => 'project1']);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('DELETE', '/project', ['id' => $nodeId])
+        $this->json('DELETE', "/project/$nodeId")
         ->seeJson([
-            'message' => 'Project node with id "'.$nodeId.'" got deleted.'
+            'message' => 'Project with id "'.$nodeId.'" got deleted.'
         ]);
         $this->assertEquals(
             200,
@@ -159,32 +159,16 @@ class ProjectTest extends TestCase
 
     public function testDeleteNotExistingProject()
     {
-        $this->json('DELETE', '/project', ['id' => 999])
+        $this->json('DELETE', '/project/999')
         ->seeJson([
             'errors' => [
                 [
-                    'message' => 'Project node with id "999" not found.'
+                    'message' => 'Project with id "999" not found.'
                 ]
             ]
         ]);
         $this->assertEquals(
             404,
-            $this->response->getStatusCode()
-        );
-    }
-
-    public function testDeleteProjectWithoutId()
-    {
-        $this->json('DELETE', '/project', ['name' => 'project1'])
-        ->seeJson([
-            'errors' => [
-                [
-                    'message' => 'Missing Project node id.'
-                ]
-            ]
-        ]);
-        $this->assertEquals(
-            400,
             $this->response->getStatusCode()
         );
     }
@@ -264,9 +248,9 @@ class ProjectTest extends TestCase
         $this->json('POST', '/category', ['name' => 'testcat2']);
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
         $nodeId = $this->response->getData(true)['id'];
-        $this->json('DELETE', '/project', ['id' => $nodeId])
+        $this->json('DELETE', "/project/$nodeId")
         ->seeJson([
-            'message' => 'Project node with id "'.$nodeId.'" got deleted.'
+            'message' => 'Project with id "'.$nodeId.'" got deleted.'
         ]);
         $this->assertEquals(
             200,

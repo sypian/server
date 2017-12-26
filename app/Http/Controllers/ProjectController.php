@@ -113,25 +113,23 @@ class ProjectController extends Controller
     /**
      * @return JsonResponse
      */
-    public function deleteProject(Request $request): JsonResponse
+    public function deleteProject(Request $request, int $id): JsonResponse
     {
-        $response = $this->verifyNodeById('Project', $request);
-
-        if ($response !== null) {
-            return $response;
+        if (!$this->nodeWithIdExists('Project', $id)) {
+            $this->addError('Project with id "'.$id.'" not found.');
+            return $this->generateJsonResponse(404);
         }
 
-        $nodeId = $request->get('id');
         $entityManager = app()->make('Neo4j\EntityManager');
         $nodesRepository = $entityManager->getRepository(Project::class);
-        $project = $nodesRepository->findOneById($nodeId);
+        $project = $nodesRepository->findOneById($id);
 
         // Relations between the project and categories have to be removed first!
         $this->removeProjectCategoryRelations($project);
 
         $entityManager->remove($project);
         $entityManager->flush();
-        return response()->json(['message' => 'Project node with id "'.$nodeId.'" got deleted.']);
+        return response()->json(['message' => 'Project with id "'.$id.'" got deleted.']);
     }
 
     public function removeProjectCategoryRelations($project)
