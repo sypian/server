@@ -378,7 +378,6 @@ class ProjectTest extends TestCase
     public function testUpdateRemoveCategory()
     {
         $this->json('POST', '/category', ['name' => 'testcat1']);
-        $catId1 = $this->response->getData(true)['id'];
         $this->json('POST', '/category', ['name' => 'testcat2']);
         $catId2 = $this->response->getData(true)['id'];
         $this->json('POST', '/project', ['name' => 'project1', 'categories' => ['testcat1', 'testcat2']]);
