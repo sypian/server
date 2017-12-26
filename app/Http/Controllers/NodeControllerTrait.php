@@ -120,6 +120,30 @@ trait NodeControllerTrait
     }
 
     /**
+     * @return JsonResponse
+     */
+    public function deleteNode(string $label, Request $request, int $nodeId, callable $removeRelations): JsonResponse
+    {
+        $response = $this->verifyNodeById($label, $nodeId);
+
+        if ($response !== null) {
+            return $response;
+        }
+
+        $entityManager = app()->make('Neo4j\EntityManager');
+        $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
+        $node = $nodesRepository->findOneById($nodeId);
+
+        // Use the Closure to remove potencial relations!
+        $removeRelations($node);
+
+        $entityManager->remove($node);
+        $entityManager->flush();
+        $this->addToPayload($label.' with id "'.$nodeId.'" got deleted.');
+        return $this->generateJsonResponse(200);
+    }
+
+    /**
      * Returns whether a node with the given node id exists in the database.
      *
      * @return bool
