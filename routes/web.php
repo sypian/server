@@ -40,3 +40,7 @@ $router->put('project/{id:[0-9]+}', [
 $router->delete('project/{id:[0-9]+}', [
     'as' => 'project', 'uses' => 'ProjectController@deleteProject'
 ]);
+
+$router->get('projects', [
+    'as' => 'project', 'uses' => 'ProjectsController@getProjects'
+]);
