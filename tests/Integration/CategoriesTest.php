@@ -3,7 +3,7 @@ namespace Tests\Integration;
 
 use Tests\TestCase;
 
-class ProjectsTest extends TestCase
+class CategoriesTest extends TestCase
 {
     protected $ids = [];
     protected $entities = [];
@@ -115,55 +115,43 @@ class ProjectsTest extends TestCase
         $this->entities['testcat4']['projects'] = [];
     }
 
-    public function testGetAllProjects()
+    public function testGetAllCategories()
     {
-        $this->json('GET', '/projects')
-             ->seeJson($this->entities['project1'])
-             ->seeJson($this->entities['project2'])
-             ->seeJson($this->entities['project3'])
-             ->seeJson($this->entities['project4']);
+        $this->json('GET', '/categories')
+             ->seeJson($this->entities['testcat1'])
+             ->seeJson($this->entities['testcat2'])
+             ->seeJson($this->entities['testcat3'])
+             ->seeJson($this->entities['testcat4']);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
         );
     }
 
-    public function testGetProjectWithName()
+    public function testGetCategoriesWithName()
     {
-        $this->json('GET', '/projects?name=project4')
-             ->seeJsonEquals([$this->entities['project4']]);
+        $this->json('GET', '/categories?name=testcat4')
+             ->seeJsonEquals([$this->entities['testcat4']]);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
         );
     }
 
-    public function testGetProjectsForCategory()
+    public function testGetCategoriesByProject()
     {
-        $this->json('GET', '/projects?category=testcat1')
-             ->seeJson($this->entities['project1'])
-             ->seeJson($this->entities['project2']);
-        $this->assertCount(2, $this->response->getData(true));
+        $this->json('GET', '/categories?project=project3')
+             ->seeJsonEquals([$this->entities['testcat3']]);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
         );
     }
 
-    public function testGetProjectsByCategory()
+    public function testGetCategoriesByNameAndProject()
     {
-        $this->json('GET', '/projects?category=testcat3')
-             ->seeJsonEquals([$this->entities['project3']]);
-        $this->assertEquals(
-            200,
-            $this->response->getStatusCode()
-        );
-    }
-
-    public function testGetProjectsByNameAndCategory()
-    {
-        $this->json('GET', '/projects?category=testcat1&name=project2')
-             ->seeJsonEquals([$this->entities['project2']]);
+        $this->json('GET', '/categories?project=project2&name=testcat1')
+             ->seeJsonEquals([$this->entities['testcat1']]);
         $this->assertEquals(
             200,
             $this->response->getStatusCode()
@@ -172,7 +160,7 @@ class ProjectsTest extends TestCase
 
     public function testGetEmptyList()
     {
-        $this->json('GET', '/projects?name=someproject')
+        $this->json('GET', '/categories?name=somecategory')
              ->seeJsonEquals([]);
         $this->assertEquals(
             200,

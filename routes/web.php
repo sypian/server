@@ -42,5 +42,9 @@ $router->delete('project/{id:[0-9]+}', [
 ]);
 
 $router->get('projects', [
-    'as' => 'project', 'uses' => 'ProjectsController@getProjects'
+    'as' => 'projects', 'uses' => 'ProjectsController@getProjects'
+]);
+
+$router->get('categories', [
+    'as' => 'categories', 'uses' => 'CategoriesController@getCategories'
 ]);
