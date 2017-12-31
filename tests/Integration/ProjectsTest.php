@@ -27,19 +27,19 @@ class ProjectsTest extends TestCase
         ];
         $this->json('POST', '/category', ['name' => 'testcat2']);
         $this->ids['testcat2'] = $this->response->getData(true)['id'];
-        $this->entities['testcat1'] = [
+        $this->entities['testcat2'] = [
             'id' => $this->ids['testcat2'],
             'name' => 'testcat2',
         ];
         $this->json('POST', '/category', ['name' => 'testcat3']);
         $this->ids['testcat3'] = $this->response->getData(true)['id'];
-        $this->entities['testcat1'] = [
+        $this->entities['testcat3'] = [
             'id' => $this->ids['testcat3'],
             'name' => 'testcat3',
         ];
         $this->json('POST', '/category', ['name' => 'testcat4']);
         $this->ids['testcat4'] = $this->response->getData(true)['id'];
-        $this->entities['testcat1'] = [
+        $this->entities['testcat4'] = [
             'id' => $this->ids['testcat4'],
             'name' => 'testcat4',
         ];
