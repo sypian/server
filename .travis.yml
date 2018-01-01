@@ -22,11 +22,11 @@ jobs:
         - export
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         - chmod +x ./cc-test-reporter
-        - docker-compose run php-fpm ./cc-test-reporter before-build
+        - docker-compose run -w "/var/www/html/" php ./cc-test-reporter before-build
         - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install --ignore-platform-reqs
         - mv .env.travis .env
         - docker-compose build
         - docker-compose up -d neo4j
-        - docker-compose run php-fpm ./bin/wait-for-neo4j.sh
+        - docker-compose run -w "/var/www/html/" php ./bin/wait-for-neo4j.sh
         - make test
-        - docker-compose run php-fpm ./cc-test-reporter after-build --coverage-input-type clover --exit-code $TRAVIS_TEST_RESULT -r $CC_TEST_REPORTER_ID
+        - docker-compose run -w "/var/www/html/" php ./cc-test-reporter after-build --coverage-input-type clover --exit-code $TRAVIS_TEST_RESULT -r $CC_TEST_REPORTER_ID
