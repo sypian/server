@@ -8,6 +8,8 @@ service:
 jobs:
   include:
     - stage: build docker image
+      env:
+        - SYPIAN_BUILD_ENV=production
       script:
         - docker run --rm --volume $TRAVIS_BUILD_DIR:/app composer install --ignore-platform-reqs
         - docker-compose build

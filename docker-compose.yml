@@ -10,7 +10,10 @@ services:
       - "80:80"
 
   php:
-    build: images/php
+    build:
+      context: images/php
+      args:
+        sypian_env: ${SYPIAN_BUILD_ENV-development}
     container_name: sypian-server
     volumes:
       - .:/var/www/html
