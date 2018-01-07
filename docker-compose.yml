@@ -1,18 +1,39 @@
 version: "3.1"
 services:
 
-  php-fpm:
-    build:
-      context: .
-    container_name: sypian-server
+  nginx:
+    build: images/nginx
+    command: nginx -g "daemon off;"
+    links:
+      - php
     ports:
-      - 8000:8000
+      - "80:80"
+
+  php:
+    build:
+      context: images/php
+      args:
+        sypian_env: ${SYPIAN_BUILD_ENV-development}
+    container_name: sypian-server
     volumes:
-      - .:/usr/src/app
-    environment:
-      - GIT_BRANCH=${TRAVIS_BRANCH-HEAD}
+      - .:/var/www/html
+    working_dir: /var/www/html/public
+    command: php-fpm
     links:
       - neo4j
+    ports:
+      - "9000:9000"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      APP_KEY: SomeRandomKey!!!
+      APP_LOCALE: en
+      APP_FALLBACK_LOCALE: en
+      NEO4J_HOST: http://neo4j
+      NEO4J_PORT: 7474
+      CACHE_DRIVER: file
+      QUEUE_DRIVER: sync
+      GIT_BRANCH: ${TRAVIS_BRANCH-HEAD}
 
   neo4j:
     image: "neo4j:latest"

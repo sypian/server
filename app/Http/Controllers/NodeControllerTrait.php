@@ -113,7 +113,10 @@ trait NodeControllerTrait
         $nodesRepository = $entityManager->getRepository('App\Models\\'.$label);
         $node = $nodesRepository->find($nodeId);
 
-        $node->setName($request->get('name'));
+        if ($request->has('name')) {
+            $node->setName($request->get('name'));
+        }
+
         $entityManager->persist($node);
         $entityManager->flush();
         return response()->json(['name' => $node->getName(), 'id' => $nodeId]);

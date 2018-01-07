@@ -111,7 +111,10 @@ class ProjectController extends Controller
             }
         }
 
-        $project->setName($request->get('name'));
+        if ($request->has('name')) {
+            $project->setName($request->get('name'));
+        }
+
         $entityManager->persist($project);
         $entityManager->flush();
         return response()->json(['name' => $project->getName(), 'id' => $project->getId()]);
