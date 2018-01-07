@@ -1,7 +1,7 @@
 openapi: '3.0.0'
 info:
   description: This is an API for managing projects in a database.
-  version: 0.3.0
+  version: 1.0.0
   title: Sypian Server API
   license:
     name: Apache 2.0
@@ -14,65 +14,107 @@ paths:
         - category
       summary: Add a new category to the graph
       description: ''
-      operationId: addCategory
+      operationId: createCategory
       requestBody:
           description: Category object that needs to be added to the graph
           required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                type: object
+                properties:
+                  name:
+                    type: string
+                required:
+                  - name
       responses:
         '200':
           description: successful operation
-        '405':
-          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/nodeid'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+
+  /category/{categoryId}:
+    get:
+      tags:
+        - category
+      summary: Returns a category by its id
+      description: Returns a single category
+      operationId: getCategory
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: The node id of the category to get.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/category'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+
     put:
       tags:
         - category
       summary: Update an existing category
       description: ''
       operationId: updateCategory
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: The node id of the category to update.
+          schema:
+            type: integer
+            minimum: 1
       requestBody:
           description: Category object that needs to be added to the graph
           required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
-      responses:
-        '200':
-          description: successful operation
-        '404':
-          description: Category not found
-        '405':
-          description: Validation exception
-
-  '/category/{categoryKey}':
-    get:
-      tags:
-        - category
-      summary: Find category by Key
-      description: Returns a single category
-      operationId: getCategoryByKey
-      parameters:
-        - name: categoryKey
-          in: path
-          description: Key of category to return
-          required: true
-          schema:
-            type: string
+                type: object
+                properties:
+                  name:
+                    type: string
+                required:
+                  - name
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                $ref: '#/components/schemas/category'
         '400':
-          description: Invalid Key supplied
+          description: Validation exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
         '404':
           description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
 
     delete:
       tags:
@@ -81,19 +123,26 @@ paths:
       description: ''
       operationId: deleteCategory
       parameters:
-        - name: categoryKey
+        - name: categoryId
           in: path
-          description: Key of category to delete
           required: true
+          description: The node id of the category to get.
           schema:
-            type: string
+            type: integer
+            minimum: 1
       responses:
         '200':
           description: successful operation
-        '400':
-          description: Invalid Key supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
         '404':
           description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
 
   /project:
     post:
@@ -101,19 +150,65 @@ paths:
         - project
       summary: Add a new project to the graph
       description: ''
-      operationId: addProject
+      operationId: createProject
       requestBody:
           description: Project object that needs to be added to the graph
           required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                type: object
+                properties:
+                  name:
+                    type: string
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - name
       responses:
         '200':
           description: successful operation
-        '405':
-          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/nodeid'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+
+  /project/{projectId}:
+    get:
+      tags:
+        - project
+      summary: Get project by project node id.
+      description: ''
+      operationId: getProject
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: The node id of the project to get.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/project'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
 
     put:
       tags:
@@ -121,46 +216,59 @@ paths:
       summary: Update an existing project
       description: ''
       operationId: updateProject
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: The node id of the project to get.
+          schema:
+            type: integer
+            minimum: 1
       requestBody:
           description: Updated project object
           required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: Invalid project supplied
-        '404':
-          description: Project not found
-
-  '/project/{projectKey}':
-    get:
-      tags:
-        - project
-      summary: Get project by project Key
-      description: ''
-      operationId: getProjectByKey
-      parameters:
-        - name: projectKey
-          in: path
-          description: Key of project to return
-          required: true
-          schema:
-            type: string
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - name
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                required:
+                  - id
+                  - name
         '400':
-          description: Invalid projectname supplied
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
         '404':
-          description: Project not found
+          description: Project/Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
 
     delete:
       tags:
@@ -169,170 +277,138 @@ paths:
       description: ''
       operationId: deleteProject
       parameters:
-        - name: projectKey
+        - name: projectId
           in: path
-          description: Key of project to delete
           required: true
+          description: The node id of the project to get.
           schema:
-            type: string
+            type: integer
+            minimum: 1
       responses:
         '200':
           description: successful operation
-        '400':
-          description: Invalid projectname supplied
         '404':
           description: Project not found
-
-  /relation:
-    post:
-      tags:
-        - relation
-      summary: Add a new relation to the graph
-      description: ''
-      operationId: addRelation
-      requestBody:
-          description: Relation object that needs to be added to the graph
-          required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Relation'
-      responses:
-        '200':
-          description: successful operation
-        '405':
-          description: Invalid input
+                $ref: '#/components/schemas/errors'
 
-    put:
-      tags:
-        - relation
-      summary: Update an existing relation
-      description: ''
-      operationId: updateRelation
-      requestBody:
-          description: Relation object that needs to be updated to the graph
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Relation'
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: Invalid Relation identifier supplied
-        '404':
-          description: Relation not found
-        '405':
-          description: Validation exception
-
+  /categories:
     get:
       tags:
-        - relation
-      summary: Find a relation
-      description: Returns a single relation
-      operationId: getRelationByQuery
+        - lists
+      summary: Get a list of categories.
+      description: 'Used to filter for categories or get lists of categories.'
+      operationId: getCategories
       requestBody:
-          description: Relation object that needs to be searched
-          required: true
+          description: Filter options
+          required: false
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RelationSearch'
+                type: object
+                properties:
+                  name:
+                    type: string
+                  project:
+                    type: string
       responses:
         '200':
-          description: successful operation
+          description: List of matching categories.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Relation'
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Relation not found
-    delete:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  projects:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                required:
+                  - id
+                  - name
+                  - projects
+
+  /projects:
+    get:
       tags:
-        - relation
-      summary: Delete a relation
-      description: ''
-      operationId: deleteRelation
+        - lists
+      summary: Get a list of projects.
+      description: 'Used to filter for projects or get lists of projects.'
+      operationId: getProjects
       requestBody:
-          description: Relation object that needs to be deleted
-          required: true
+          description: Filter options
+          required: false
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RelationSearch'
+                type: object
+                properties:
+                  name:
+                    type: string
+                  category:
+                    type: string
       responses:
         '200':
-          description: successful operation
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Relation not found
+          description: List of matching projects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#components/schemas/project'
+
 
 components:
   schemas:
-    Node:
+    errors:
+      type: array
+      items:
+        type: object
+        properties:
+          message:
+            type: string
+        required:
+          - message
+    nodeid:
       type: object
       properties:
-        key:
+        id:
+          type: integer
+      required:
+        - id
+    category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
           type: string
-        properties:
+      required:
+        - id
+        - name
+    project:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        categories:
           type: array
           items:
-            $ref: '#/components/schemas/Property'
-          format: Label
-      xml:
-        name: Node
-    Category:
-      allOf:
-        - $ref: '#/components/schemas/Node'
-      type: object
-      xml:
-        name: Category
-    Project:
-      allOf:
-        - $ref: '#/components/schemas/Node'
-      type: object
-      xml:
-        name: Project
-    Relation:
-      type: object
-      properties:
-        type:
-          type: string
-        from:
-          type: object
-          $ref: '#/components/schemas/Node'
-        to:
-          type: object
-          $ref: '#/components/schemas/Node'
-        properties:
-          type: array
-          items:
-            $ref: '#/components/schemas/Property'
-          uniqueItems: true
-      xml:
-        name: Tag
-    Property:
-      type: object
-      properties:
-        key:
-          type: string
-        value:
-          type: string
-      xml:
-        name: Label
-    RelationSearch:
-      type: object
-      properties:
-        type:
-          type: string
-          description: The type of the relation
-        toNode:
-          type: string
-          description: Key of Node where the relation ends
-        fromNode:
-          type: string
-          description: Key of Node where the relation starts
+            $ref: '#/components/schemas/category'
+      required:
+        - id
+        - name
+        - categories
