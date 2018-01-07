@@ -14,65 +14,103 @@ paths:
         - category
       summary: Add a new category to the graph
       description: ''
-      operationId: addCategory
+      operationId: createCategory
       requestBody:
           description: Category object that needs to be added to the graph
           required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                type: object
+                properties:
+                  name:
+                    type: string
       responses:
         '200':
           description: successful operation
-        '405':
-          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/nodeid'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+
+  /category/{categoryId}:
     put:
       tags:
         - category
       summary: Update an existing category
       description: ''
       operationId: updateCategory
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: The node id of the category to update.
+          schema:
+            type: integer
+            minimum: 1
       requestBody:
           description: Category object that needs to be added to the graph
           required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
-      responses:
-        '200':
-          description: successful operation
-        '404':
-          description: Category not found
-        '405':
-          description: Validation exception
-
-  '/category/{categoryKey}':
-    get:
-      tags:
-        - category
-      summary: Find category by Key
-      description: Returns a single category
-      operationId: getCategoryByKey
-      parameters:
-        - name: categoryKey
-          in: path
-          description: Key of category to return
-          required: true
-          schema:
-            type: string
+                type: object
+                properties:
+                  name:
+                    type: string
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
+                $ref: '#/components/schemas/category'
         '400':
-          description: Invalid Key supplied
+          description: Validation exception
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
         '404':
           description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+
+    get:
+      tags:
+        - category
+      summary: Returns a category by its id
+      description: Returns a single category
+      operationId: getCategory
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: The node id of the category to get.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/category'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
 
     delete:
       tags:
@@ -81,19 +119,26 @@ paths:
       description: ''
       operationId: deleteCategory
       parameters:
-        - name: categoryKey
+        - name: categoryId
           in: path
-          description: Key of category to delete
           required: true
+          description: The node id of the category to get.
           schema:
-            type: string
+            type: integer
+            minimum: 1
       responses:
         '200':
           description: successful operation
-        '400':
-          description: Invalid Key supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
         '404':
           description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
 
   /project:
     post:
@@ -273,66 +318,22 @@ paths:
 
 components:
   schemas:
-    Node:
-      type: object
-      properties:
-        key:
-          type: string
+    errors:
+      type: array
+      items:
+        type: object
         properties:
-          type: array
-          items:
-            $ref: '#/components/schemas/Property'
-          format: Label
-      xml:
-        name: Node
-    Category:
-      allOf:
-        - $ref: '#/components/schemas/Node'
-      type: object
-      xml:
-        name: Category
-    Project:
-      allOf:
-        - $ref: '#/components/schemas/Node'
-      type: object
-      xml:
-        name: Project
-    Relation:
+          message:
+            type: string
+    nodeid:
       type: object
       properties:
-        type:
-          type: string
-        from:
-          type: object
-          $ref: '#/components/schemas/Node'
-        to:
-          type: object
-          $ref: '#/components/schemas/Node'
-        properties:
-          type: array
-          items:
-            $ref: '#/components/schemas/Property'
-          uniqueItems: true
-      xml:
-        name: Tag
-    Property:
+        id:
+          type: integer
+    category:
       type: object
       properties:
-        key:
+        id:
+          type: integer
+        name:
           type: string
-        value:
-          type: string
-      xml:
-        name: Label
-    RelationSearch:
-      type: object
-      properties:
-        type:
-          type: string
-          description: The type of the relation
-        toNode:
-          type: string
-          description: Key of Node where the relation ends
-        fromNode:
-          type: string
-          description: Key of Node where the relation starts
