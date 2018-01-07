@@ -25,6 +25,8 @@ paths:
                 properties:
                   name:
                     type: string
+                required:
+                  - name
       responses:
         '200':
           description: successful operation
@@ -64,6 +66,8 @@ paths:
                 properties:
                   name:
                     type: string
+                required:
+                  - name
       responses:
         '200':
           description: successful operation
@@ -146,66 +150,125 @@ paths:
         - project
       summary: Add a new project to the graph
       description: ''
-      operationId: addProject
+      operationId: createProject
       requestBody:
           description: Project object that needs to be added to the graph
           required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                type: object
+                properties:
+                  name:
+                    type: string
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - name
       responses:
         '200':
           description: successful operation
-        '405':
-          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/nodeid'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
 
+  /project/{projectId}:
     put:
       tags:
         - project
       summary: Update an existing project
       description: ''
       operationId: updateProject
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: The node id of the project to get.
+          schema:
+            type: integer
+            minimum: 1
       requestBody:
           description: Updated project object
           required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: Invalid project supplied
-        '404':
-          description: Project not found
-
-  '/project/{projectKey}':
-    get:
-      tags:
-        - project
-      summary: Get project by project Key
-      description: ''
-      operationId: getProjectByKey
-      parameters:
-        - name: projectKey
-          in: path
-          description: Key of project to return
-          required: true
-          schema:
-            type: string
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - name
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                required:
+                  - id
+                  - name
         '400':
-          description: Invalid projectname supplied
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+        '404':
+          description: Project/Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+
+    get:
+      tags:
+        - project
+      summary: Get project by project node id.
+      description: ''
+      operationId: getProject
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: The node id of the project to get.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/project'
         '404':
           description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
 
     delete:
       tags:
@@ -214,107 +277,22 @@ paths:
       description: ''
       operationId: deleteProject
       parameters:
-        - name: projectKey
+        - name: projectId
           in: path
-          description: Key of project to delete
           required: true
+          description: The node id of the project to get.
           schema:
-            type: string
+            type: integer
+            minimum: 1
       responses:
         '200':
           description: successful operation
-        '400':
-          description: Invalid projectname supplied
         '404':
           description: Project not found
-
-  /relation:
-    post:
-      tags:
-        - relation
-      summary: Add a new relation to the graph
-      description: ''
-      operationId: addRelation
-      requestBody:
-          description: Relation object that needs to be added to the graph
-          required: true
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Relation'
-      responses:
-        '200':
-          description: successful operation
-        '405':
-          description: Invalid input
-
-    put:
-      tags:
-        - relation
-      summary: Update an existing relation
-      description: ''
-      operationId: updateRelation
-      requestBody:
-          description: Relation object that needs to be updated to the graph
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Relation'
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: Invalid Relation identifier supplied
-        '404':
-          description: Relation not found
-        '405':
-          description: Validation exception
-
-    get:
-      tags:
-        - relation
-      summary: Find a relation
-      description: Returns a single relation
-      operationId: getRelationByQuery
-      requestBody:
-          description: Relation object that needs to be searched
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelationSearch'
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Relation'
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Relation not found
-    delete:
-      tags:
-        - relation
-      summary: Delete a relation
-      description: ''
-      operationId: deleteRelation
-      requestBody:
-          description: Relation object that needs to be deleted
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RelationSearch'
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Relation not found
+                $ref: '#/components/schemas/errors'
 
 components:
   schemas:
@@ -325,11 +303,15 @@ components:
         properties:
           message:
             type: string
+        required:
+          - message
     nodeid:
       type: object
       properties:
         id:
           type: integer
+      required:
+        - id
     category:
       type: object
       properties:
@@ -337,3 +319,22 @@ components:
           type: integer
         name:
           type: string
+      required:
+        - id
+        - name
+    project:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        categories:
+          type: array
+          items:
+            type:
+              $ref: '#/components/schemas/category'
+      required:
+        - id
+        - name
+        - categories
