@@ -42,6 +42,34 @@ paths:
                 $ref: '#/components/schemas/errors'
 
   /category/{categoryId}:
+    get:
+      tags:
+        - category
+      summary: Returns a category by its id
+      description: Returns a single category
+      operationId: getCategory
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: The node id of the category to get.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/category'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+
     put:
       tags:
         - category
@@ -81,34 +109,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
-        '404':
-          description: Category not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors'
-
-    get:
-      tags:
-        - category
-      summary: Returns a category by its id
-      description: Returns a single category
-      operationId: getCategory
-      parameters:
-        - name: categoryId
-          in: path
-          required: true
-          description: The node id of the category to get.
-          schema:
-            type: integer
-            minimum: 1
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/category'
         '404':
           description: Category not found
           content:
@@ -182,6 +182,34 @@ paths:
                 $ref: '#/components/schemas/errors'
 
   /project/{projectId}:
+    get:
+      tags:
+        - project
+      summary: Get project by project node id.
+      description: ''
+      operationId: getProject
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: The node id of the project to get.
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/project'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+
     put:
       tags:
         - project
@@ -237,34 +265,6 @@ paths:
                 $ref: '#/components/schemas/errors'
         '404':
           description: Project/Category not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors'
-
-    get:
-      tags:
-        - project
-      summary: Get project by project node id.
-      description: ''
-      operationId: getProject
-      parameters:
-        - name: projectId
-          in: path
-          required: true
-          description: The node id of the project to get.
-          schema:
-            type: integer
-            minimum: 1
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/project'
-        '404':
-          description: Project not found
           content:
             application/json:
               schema:
@@ -332,8 +332,7 @@ components:
         categories:
           type: array
           items:
-            type:
-              $ref: '#/components/schemas/category'
+            $ref: '#/components/schemas/category'
       required:
         - id
         - name
