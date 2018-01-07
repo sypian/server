@@ -1,7 +1,7 @@
 openapi: '3.0.0'
 info:
   description: This is an API for managing projects in a database.
-  version: 0.3.0
+  version: 1.0.0
   title: Sypian Server API
   license:
     name: Apache 2.0
