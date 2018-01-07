@@ -294,6 +294,81 @@ paths:
               schema:
                 $ref: '#/components/schemas/errors'
 
+  /categories:
+    get:
+      tags:
+        - lists
+      summary: Get a list of categories.
+      description: 'Used to filter for categories or get lists of categories.'
+      operationId: getCategories
+      requestBody:
+          description: Filter options
+          required: false
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  project:
+                    type: string
+      responses:
+        '200':
+          description: List of matching categories.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  projects:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                required:
+                  - id
+                  - name
+                  - projects
+
+  /projects:
+    get:
+      tags:
+        - lists
+      summary: Get a list of projects.
+      description: 'Used to filter for projects or get lists of projects.'
+      operationId: getProjects
+      requestBody:
+          description: Filter options
+          required: false
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  category:
+                    type: string
+      responses:
+        '200':
+          description: List of matching projects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#components/schemas/project'
+
+
 components:
   schemas:
     errors:
